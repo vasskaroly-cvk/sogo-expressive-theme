@@ -1,8 +1,8 @@
 /**
  * ============================================================================
- * SOGo Webmail - Modern Expressive (Material 3) Theme
- * Version: 1.0.0
- * Description: A modern, light-blue Material 3 inspired theme for SOGo Webmail.
+ * SOGo Webmail - Modern Gmail (Material 3) Theme
+ * Version: 1.0.1
+ * Description: A modern, light-blue Gmail Material 3 theme for SOGo Webmail.
  * Features: 
  *  - Floating rounded card layout
  *  - Pill/capsule selections for folders and email rows
@@ -18,7 +18,7 @@
 
   angular.module('SOGo.Common')
     .config(configureTheme)
-    .run(applyExpressiveTheme);
+    .run(applyGmailTheme);
 
   /* ======================================================
      1. ANGULAR MATERIAL THEME CONFIGURATION
@@ -26,8 +26,8 @@
   configureTheme.$inject = ['$mdThemingProvider'];
   function configureTheme($mdThemingProvider) {
     
-    // Define custom Material 3 Light Blue Palette (#c2e7ff)
-    var expressiveBlue = $mdThemingProvider.extendPalette('blue', {
+    // Define custom Gmail Material 3 Light Blue Palette (#c2e7ff)
+    var gmailBlue = $mdThemingProvider.extendPalette('blue', {
       '50': 'c2e7ff', '100': 'c2e7ff', '200': 'c2e7ff', '300': 'c2e7ff',
       '400': 'c2e7ff', '500': 'c2e7ff', '600': 'c2e7ff', '700': 'c2e7ff',
       '800': 'c2e7ff', '900': 'c2e7ff', 'A100': 'c2e7ff', 'A200': 'c2e7ff',
@@ -35,11 +35,11 @@
       'contrastDefaultColor': 'dark'
     });
     
-    $mdThemingProvider.definePalette('expressiveBlue', expressiveBlue);
+    $mdThemingProvider.definePalette('gmailBlue', gmailBlue);
 
     $mdThemingProvider.theme('default')
       .primaryPalette('grey', { 'default': '50' }) 
-      .accentPalette('expressiveBlue'); 
+      .accentPalette('gmailBlue'); 
       
     $mdThemingProvider.generateThemesOnDemand(false);
   }
@@ -47,11 +47,11 @@
   /* ======================================================
      2. DYNAMIC STYLES & REAL-TIME DOM SYNCHRONIZATION
      ====================================================== */
-  applyExpressiveTheme.$inject = ['$interval', '$timeout'];
-  function applyExpressiveTheme($interval, $timeout) {
+  applyGmailTheme.$inject = ['$interval', '$timeout'];
+  function applyGmailTheme($interval, $timeout) {
 
     function injectPersistentStyle() {
-      const styleId = 'sogo-expressive-theme-v1-0-0';
+      const styleId = 'sogo-gmail-theme-v1-0-1';
       if (!document.getElementById(styleId)) {
         const style = document.createElement('style');
         style.id = styleId;
@@ -64,7 +64,7 @@
               background-color: #f4f7fc !important;
               height: 100vh !important;
               max-height: 100vh !important;
-              border-bottom: 16px solid #f4f7fc !important; /* Root bottom barrier */
+              border-bottom: 16px solid #f4f7fc !important;
               box-sizing: border-box !important;
               overflow: hidden !important;
           }
@@ -84,7 +84,7 @@
           /* =========================================
              2. FLOATING COLUMN CARDS
              ========================================= */
-          [ui-view="list"], [ui-view="detail"] {
+          [ui-view="list"], [ui-view="detail"], [ui-view="calendar"], [ui-view="contacts"] {
               background-color: transparent !important;
               background: transparent !important;
               box-sizing: border-box !important;
@@ -94,7 +94,13 @@
 
           /* Middle Column (Email List Card): 24px Radius All Corners */
           [id="messagesList"], 
-          .sg-list {
+          [id="contactsList"],
+          .sg-list,
+          .sg-contacts-list,
+          .sg-calendar-view,
+          [ui-view="calendar"] > *,
+          [id="calendarView"],
+          .sg-calendar-container {
               background-color: #ffffff !important;
               border-radius: 24px !important;
               margin: 8px 4px 0px 6px !important;
@@ -110,8 +116,12 @@
           md-card,
           [id="mailView"],
           [id="messageView"],
+          [id="contactView"],
+          [id="cardView"],
           .sg-mail-view, 
-          .sg-record-view {
+          .sg-record-view,
+          .sg-contact-view,
+          .sg-card-view {
               background-color: #ffffff !important;
               border-top-left-radius: 0 !important;
               border-top-right-radius: 0 !important;
@@ -128,8 +138,17 @@
 
           /* Left Sidebar Container: Flat Top, 24px Round Bottom */
           md-sidenav,
-          md-sidenav.md-locked-open {
+          md-sidenav.md-locked-open,
+          md-sidenav md-content,
+          md-sidenav md-content.md-default-theme,
+          .sg-calendar-sidebar,
+          .sg-contacts-sidebar,
+          .sg-folder-list {
               background-color: #f4f7fc !important;
+              background: #f4f7fc !important;
+              border: none !important;
+              border-right: none !important;
+              box-shadow: none !important;
               border-top-left-radius: 0 !important;
               border-top-right-radius: 0 !important;
               border-bottom-left-radius: 24px !important;
@@ -141,22 +160,67 @@
               box-sizing: border-box !important;
           }
 
-          .sg-list md-toolbar, [id="messagesList"] md-toolbar {
+          .sg-list md-toolbar, [id="messagesList"] md-toolbar, [id="contactsList"] md-toolbar, .sg-calendar-view md-toolbar {
               background-color: #ffffff !important;
               border-bottom: 1px solid #f1f3f4 !important;
               border-top-left-radius: 24px !important;
               border-top-right-radius: 24px !important;
           }
 
-          .sg-mail-view md-toolbar, [id="mailView"] md-toolbar, md-card md-toolbar {
+          .sg-mail-view md-toolbar, [id="mailView"] md-toolbar, md-card md-toolbar, .sg-contact-view md-toolbar {
               background-color: #ffffff !important;
               border-bottom: 1px solid #f1f3f4 !important;
               border-radius: 0 !important;
           }
 
+          .sg-mail-body:after,
+          .sg-mail-container:after,
+          .sg-mail-view:after,
+          [id="mailView"]:after,
+          md-card:after,
+          md-card md-content:after {
+              content: ' ' !important;
+              display: block !important;
+              height: 12px !important;
+              min-height: 12px !important;
+              width: 100% !important;
+              clear: both !important;
+          }
+
+          .sg-mail-body,
+          .sg-mail-container,
+          .sg-mail-view md-content,
+          md-card md-content,
+          iframe#messageFrame,
+          iframe {
+              padding-bottom: 12px !important;
+              margin-bottom: 12px !important;
+              box-sizing: border-box !important;
+          }
+
           /* =========================================
              3. SIDEBAR FOLDER CAPSULES
              ========================================= */
+          md-sidenav md-subheader,
+          md-sidenav .md-subheader,
+          md-sidenav .md-subheader-inner,
+          md-sidenav md-list,
+          md-sidenav .sg-calendar-list,
+          md-sidenav .sg-contacts-list,
+          md-sidenav .sg-category {
+              background-color: transparent !important;
+              background: transparent !important;
+              box-shadow: none !important;
+              border: none !important;
+          }
+
+          md-sidenav md-subheader .md-subheader-inner,
+          md-sidenav .md-subheader {
+              color: #5f6368 !important;
+              font-weight: 700 !important;
+              font-size: 12px !important;
+          }
+
           md-sidenav md-list-item {
               margin: 2px 12px !important;
               width: calc(100% - 24px) !important;
@@ -187,6 +251,27 @@
               background-color: #eaf1fb !important;
           }
           
+          md-sidenav .sg-filter-input,
+          md-sidenav md-toolbar.sg-filter-toolbar,
+          md-sidenav form.sg-filter,
+          md-sidenav [layout="row"]:has(input),
+          md-sidenav form,
+          md-sidenav .md-toolbar-tools:has(input) {
+              background-color: #eaf1fb !important;
+              background: #eaf1fb !important;
+              border-radius: 24px !important;
+              margin: 8px 12px !important;
+              padding: 2px 12px !important;
+              color: #041e49 !important;
+              border: none !important;
+              box-shadow: none !important;
+          }
+
+          md-sidenav input {
+              color: #041e49 !important;
+              background-color: transparent !important;
+          }
+
           md-sidenav md-list-item *,
           md-sidenav md-list-item md-icon,
           md-sidenav md-list-item md-icon svg {
@@ -208,7 +293,11 @@
              ========================================= */
           [id="messagesList"] md-list-item,
           [id="messagesList"] .sg-tile,
-          [id="messagesList"] .sg-list-item {
+          [id="messagesList"] .sg-list-item,
+          [id="contactsList"] md-list-item,
+          [id="contactsList"] .sg-tile,
+          [id="contactsList"] .sg-list-item,
+          .sg-contacts-list md-list-item {
               margin: 2px 10px !important;
               width: calc(100% - 20px) !important;
               max-width: calc(100% - 20px) !important;
@@ -220,12 +309,72 @@
 
           /* Hover State */
           [id="messagesList"] md-list-item:hover,
-          [id="messagesList"] .sg-tile:hover { 
+          [id="messagesList"] .sg-tile:hover,
+          [id="contactsList"] md-list-item:hover,
+          [id="contactsList"] .sg-tile:hover { 
               background-color: #f1f3f4 !important; 
           }
 
           /* =========================================
-             5. HEADER ICONS, QUOTA & FAB
+             5. DIALOGS & POP-UPS
+             ========================================= */
+          md-dialog,
+          .md-dialog-container,
+          md-dialog-content,
+          .sg-event-editor {
+              background-color: #ffffff !important;
+              color: #202124 !important;
+              border-radius: 24px !important;
+              box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
+          }
+
+          md-dialog input,
+          md-dialog textarea,
+          md-dialog md-select,
+          md-dialog md-select-value,
+          md-dialog .md-select-value,
+          md-dialog label,
+          md-dialog span,
+          md-dialog div,
+          md-dialog p,
+          md-dialog md-radio-button .md-label,
+          md-dialog md-checkbox .md-label {
+              color: #041e49 !important;
+          }
+
+          md-dialog md-input-container label,
+          md-dialog md-input-container .md-placeholder {
+              color: #5f6368 !important;
+          }
+
+          md-dialog md-input-container .md-input {
+              border-color: #dadce0 !important;
+              color: #041e49 !important;
+          }
+
+          md-dialog md-dialog-actions,
+          md-dialog .md-actions,
+          md-dialog-actions {
+              background-color: #ffffff !important;
+              border-top: 1px solid #f1f3f4 !important;
+              padding: 12px 16px !important;
+          }
+
+          md-dialog md-dialog-actions button,
+          md-dialog .md-actions button,
+          md-dialog button.md-button,
+          md-dialog-actions button.md-button {
+              color: #0b57d0 !important; 
+              font-weight: 700 !important;
+              border-radius: 20px !important;
+          }
+
+          md-dialog button.md-button[disabled] {
+              color: #a8c7fa !important;
+          }
+
+          /* =========================================
+             6. HEADER ICONS, QUOTA & FAB
              ========================================= */
           .sg-user-info, .sg-user-info *, .sg-user-name, 
           .sg-md-caption, md-sidenav .md-caption {
@@ -284,9 +433,13 @@
         wrappers[w].style.setProperty('margin-bottom', '0px', 'important');
       }
 
-      var sideNavs = document.querySelectorAll('md-sidenav, md-sidenav.md-locked-open');
+      var sideNavs = document.querySelectorAll('md-sidenav, md-sidenav.md-locked-open, md-sidenav md-content, .sg-calendar-sidebar, .sg-contacts-sidebar, .sg-folder-list');
       for (var s = 0; s < sideNavs.length; s++) {
         var sn = sideNavs[s];
+        sn.style.setProperty('background-color', '#f4f7fc', 'important');
+        sn.style.setProperty('background', '#f4f7fc', 'important');
+        sn.style.setProperty('border', 'none', 'important');
+        sn.style.setProperty('border-right', 'none', 'important');
         sn.style.setProperty('border-top-left-radius', '0px', 'important');
         sn.style.setProperty('border-top-right-radius', '0px', 'important');
         sn.style.setProperty('border-bottom-left-radius', '24px', 'important');
@@ -297,7 +450,15 @@
         sn.style.setProperty('overflow', 'hidden', 'important');
       }
 
-      var listCards = document.querySelectorAll('#messagesList, .sg-list');
+      var subHeaders = document.querySelectorAll('md-sidenav md-subheader, md-sidenav .md-subheader, md-sidenav .md-subheader-inner, md-sidenav md-list, md-sidenav .sg-calendar-list, md-sidenav .sg-contacts-list');
+      for (var sh = 0; sh < subHeaders.length; sh++) {
+        subHeaders[sh].style.setProperty('background-color', 'transparent', 'important');
+        subHeaders[sh].style.setProperty('background', 'transparent', 'important');
+        subHeaders[sh].style.setProperty('box-shadow', 'none', 'important');
+        subHeaders[sh].style.setProperty('border', 'none', 'important');
+      }
+
+      var listCards = document.querySelectorAll('#messagesList, #contactsList, .sg-list, .sg-contacts-list, .sg-calendar-view, [ui-view="calendar"], #calendarView, .sg-calendar-container');
       for (var l = 0; l < listCards.length; l++) {
         var lc = listCards[l];
         lc.style.setProperty('border-radius', '24px', 'important');
@@ -309,7 +470,7 @@
         lc.style.setProperty('background-color', '#ffffff', 'important');
       }
 
-      var detailCards = document.querySelectorAll('md-card, .sg-mail-view, .sg-record-view');
+      var detailCards = document.querySelectorAll('md-card, .sg-mail-view, .sg-record-view, .sg-contact-view, .sg-card-view, #contactView, #cardView');
       for (var d = 0; d < detailCards.length; d++) {
         var dc = detailCards[d];
         dc.style.setProperty('border-top-left-radius', '0px', 'important');
@@ -322,13 +483,41 @@
         dc.style.setProperty('overflow', 'hidden', 'important');
         dc.style.setProperty('background-color', '#ffffff', 'important');
       }
+
+      var mailBodies = document.querySelectorAll('.sg-mail-body, .sg-mail-container, .sg-mail-view md-content, md-card md-content');
+      for (var b = 0; b < mailBodies.length; b++) {
+        var body = mailBodies[b];
+        var spacer = body.querySelector('.sg-bottom-spacer');
+        if (!spacer) {
+          spacer = document.createElement('div');
+          spacer.className = 'sg-bottom-spacer';
+          body.appendChild(spacer);
+        }
+        spacer.style.setProperty('height', '12px', 'important');
+        spacer.style.setProperty('min-height', '12px', 'important');
+        spacer.style.setProperty('width', '100%', 'important');
+        spacer.style.setProperty('display', 'block', 'important');
+        spacer.style.setProperty('clear', 'both', 'important');
+      }
+
+      var iframes = document.querySelectorAll('iframe, #messageFrame, .sg-mail-iframe');
+      for (var i = 0; i < iframes.length; i++) {
+        var iframe = iframes[i];
+        try {
+          if (iframe.contentDocument && iframe.contentDocument.body) {
+            iframe.contentDocument.body.style.setProperty('padding-bottom', '12px', 'important');
+            iframe.contentDocument.body.style.setProperty('box-sizing', 'border-box', 'important');
+          }
+        } catch (e) {}
+        iframe.style.setProperty('margin-bottom', '8px', 'important');
+      }
     }
 
     // ACTIVE EMAIL & UNREAD FOLDER SYNCHRONIZER
     function syncActiveMailAndUnreadFolders() {
-      // 1. ACTIVE MAIL SELECTION
-      var list = document.getElementById('messagesList');
-      if (list) {
+      var listContainers = document.querySelectorAll('#messagesList, #contactsList, [ui-view="list"], .sg-contacts-list');
+      for (var c = 0; c < listContainers.length; c++) {
+        var list = listContainers[c];
         var items = list.querySelectorAll('md-list-item, .sg-tile, .sg-list-item');
         for (var i = 0; i < items.length; i++) {
           var item = items[i];
@@ -365,7 +554,6 @@
         }
       }
 
-      // 2. UNREAD FOLDER CAPSULE HIGHLIGHT
       var sideNav = document.querySelector('md-sidenav');
       if (sideNav) {
         var folderItems = sideNav.querySelectorAll('md-list-item');
@@ -411,6 +599,28 @@
                 normalSpans[n].style.removeProperty('font-weight');
               }
             }
+          }
+        }
+      }
+
+      var dialogs = document.querySelectorAll('md-dialog, .sg-event-editor');
+      for (var d = 0; d < dialogs.length; d++) {
+        var dlg = dialogs[d];
+        dlg.style.setProperty('background-color', '#ffffff', 'important');
+        dlg.style.setProperty('color', '#202124', 'important');
+
+        var formInputs = dlg.querySelectorAll('input, textarea, md-select, .md-select-value, label, span, p');
+        for (var inp = 0; inp < formInputs.length; inp++) {
+          formInputs[inp].style.setProperty('color', '#041e49', 'important');
+        }
+
+        var dialogBtns = dlg.querySelectorAll('button, .md-button');
+        for (var b = 0; b < dialogBtns.length; b++) {
+          var btn = dialogBtns[b];
+          if (!btn.hasAttribute('disabled')) {
+            btn.style.setProperty('color', '#0b57d0', 'important');
+          } else {
+            btn.style.setProperty('color', '#a8c7fa', 'important');
           }
         }
       }
