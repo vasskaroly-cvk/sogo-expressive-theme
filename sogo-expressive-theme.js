@@ -1,8 +1,8 @@
 /**
  * ============================================================================
- * SOGo Webmail - Modern Gmail (Material 3) Theme
- * Version: 1.0.1
- * Description: A modern, light-blue Gmail Material 3 theme for SOGo Webmail.
+ * SOGo Webmail - Modern Expressive (Material 3) Theme
+ * Version: 1.0.2
+ * Description: A modern, light-blue Expressive Material 3 theme for SOGo Webmail.
  * Features: 
  *  - Floating rounded card layout
  *  - Pill/capsule selections for folders and email rows
@@ -17,17 +17,17 @@
   'use strict';
 
   angular.module('SOGo.Common')
-    .config(configureTheme)
-    .run(applyGmailTheme);
+    .config(configure)
+    .run(applyExpressiveTheme);
 
   /* ======================================================
-     1. ANGULAR MATERIAL THEME CONFIGURATION
+     1. ANGULAR THEME: A stabil Hibrid Paletta (TÖKÉLETES)
      ====================================================== */
-  configureTheme.$inject = ['$mdThemingProvider'];
-  function configureTheme($mdThemingProvider) {
+  configure.$inject = ['$mdThemingProvider'];
+  function configure($mdThemingProvider) {
     
-    // Define custom Gmail Material 3 Light Blue Palette (#c2e7ff)
-    var gmailBlue = $mdThemingProvider.extendPalette('blue', {
+    // Define custom Expressive Material 3 Light Blue Palette (#c2e7ff)
+    var expressiveBlue = $mdThemingProvider.extendPalette('blue', {
       '50': 'c2e7ff', '100': 'c2e7ff', '200': 'c2e7ff', '300': 'c2e7ff',
       '400': 'c2e7ff', '500': 'c2e7ff', '600': 'c2e7ff', '700': 'c2e7ff',
       '800': 'c2e7ff', '900': 'c2e7ff', 'A100': 'c2e7ff', 'A200': 'c2e7ff',
@@ -35,30 +35,30 @@
       'contrastDefaultColor': 'dark'
     });
     
-    $mdThemingProvider.definePalette('gmailBlue', gmailBlue);
+    $mdThemingProvider.definePalette('expressiveBlue', expressiveBlue);
 
     $mdThemingProvider.theme('default')
       .primaryPalette('grey', { 'default': '50' }) 
-      .accentPalette('gmailBlue'); 
+      .accentPalette('expressiveBlue'); 
       
     $mdThemingProvider.generateThemesOnDemand(false);
   }
 
   /* ======================================================
-     2. DYNAMIC STYLES & REAL-TIME DOM SYNCHRONIZATION
+     2. CSS INJEKTÁLÁS ÉS INTELLIGENS JS SZINKRONIZÁLÁS
      ====================================================== */
-  applyGmailTheme.$inject = ['$interval', '$timeout'];
-  function applyGmailTheme($interval, $timeout) {
+  applyExpressiveTheme.$inject = ['$interval', '$timeout'];
+  function applyExpressiveTheme($interval, $timeout) {
 
     function injectPersistentStyle() {
-      const styleId = 'sogo-gmail-theme-v1-0-1';
+      const styleId = 'sogo-expressive-theme-v1-0-2';
       if (!document.getElementById(styleId)) {
         const style = document.createElement('style');
         style.id = styleId;
         
         style.textContent = `
           /* =========================================
-             1. CANVAS & ROOT BASELINE
+             1. ALAP HÁTTÉR ÉS A GYÖKÉR PADLÓ-GÁT
              ========================================= */
           html, body {
               background-color: #f4f7fc !important;
@@ -82,7 +82,7 @@
           }
 
           /* =========================================
-             2. FLOATING COLUMN CARDS
+             2. A NAGY DOBOZOK FORMÁJA (Levelező, Naptár & Címjegyzék)
              ========================================= */
           [ui-view="list"], [ui-view="detail"], [ui-view="calendar"], [ui-view="contacts"] {
               background-color: transparent !important;
@@ -92,7 +92,7 @@
               margin-bottom: 0 !important;
           }
 
-          /* Middle Column (Email List Card): 24px Radius All Corners */
+          /* KÖZÉPSŐ OSZLOPKÁRTYÁK (Levéllista, Kapcsolatlista, Naptár Háló) */
           [id="messagesList"], 
           [id="contactsList"],
           .sg-list,
@@ -104,15 +104,15 @@
               background-color: #ffffff !important;
               border-radius: 24px !important;
               margin: 8px 4px 0px 6px !important;
-              height: calc(100% - 8px) !important;
-              max-height: calc(100% - 8px) !important;
+              height: calc(100% - 24px) !important;
+              max-height: calc(100% - 24px) !important;
               box-shadow: 0 1px 4px rgba(60,64,67,0.15) !important;
               overflow: hidden !important;
               border: none !important;
               box-sizing: border-box !important;
           }
 
-          /* Right Column (Email Content Card): Flat Top, 24px Round Bottom */
+          /* JOBB OLDALI OSZLOPKÁRTYÁK (Levél, Névjegy) */
           md-card,
           [id="mailView"],
           [id="messageView"],
@@ -136,7 +136,48 @@
               box-sizing: border-box !important;
           }
 
-          /* Left Sidebar Container: Flat Top, 24px Round Bottom */
+          /* BELSŐ LEVÉLTARTALOM FINOMÍTOTT 12PX PÁRNÁZÁSA */
+          .sg-mail-body:after,
+          .sg-mail-container:after,
+          .sg-mail-view:after,
+          [id="mailView"]:after,
+          md-card:after,
+          md-card md-content:after {
+              content: ' ' !important;
+              display: block !important;
+              height: 12px !important; 
+              min-height: 12px !important;
+              width: 100% !important;
+              clear: both !important;
+          }
+
+          .sg-mail-body,
+          .sg-mail-container,
+          .sg-mail-view md-content,
+          md-card md-content,
+          iframe#messageFrame,
+          iframe {
+              padding-bottom: 12px !important; 
+              margin-bottom: 12px !important;
+              box-sizing: border-box !important;
+          }
+
+          .sg-list md-toolbar, [id="messagesList"] md-toolbar, [id="contactsList"] md-toolbar, .sg-calendar-view md-toolbar {
+              background-color: #ffffff !important;
+              border-bottom: 1px solid #f1f3f4 !important;
+              border-top-left-radius: 24px !important;
+              border-top-right-radius: 24px !important;
+          }
+
+          .sg-mail-view md-toolbar, [id="mailView"] md-toolbar, md-card md-toolbar, .sg-contact-view md-toolbar {
+              background-color: #ffffff !important;
+              border-bottom: 1px solid #f1f3f4 !important;
+              border-radius: 0 !important;
+          }
+
+          /* =========================================
+             3. OLDALSÁV
+             ========================================= */
           md-sidenav,
           md-sidenav.md-locked-open,
           md-sidenav md-content,
@@ -160,47 +201,6 @@
               box-sizing: border-box !important;
           }
 
-          .sg-list md-toolbar, [id="messagesList"] md-toolbar, [id="contactsList"] md-toolbar, .sg-calendar-view md-toolbar {
-              background-color: #ffffff !important;
-              border-bottom: 1px solid #f1f3f4 !important;
-              border-top-left-radius: 24px !important;
-              border-top-right-radius: 24px !important;
-          }
-
-          .sg-mail-view md-toolbar, [id="mailView"] md-toolbar, md-card md-toolbar, .sg-contact-view md-toolbar {
-              background-color: #ffffff !important;
-              border-bottom: 1px solid #f1f3f4 !important;
-              border-radius: 0 !important;
-          }
-
-          .sg-mail-body:after,
-          .sg-mail-container:after,
-          .sg-mail-view:after,
-          [id="mailView"]:after,
-          md-card:after,
-          md-card md-content:after {
-              content: ' ' !important;
-              display: block !important;
-              height: 12px !important;
-              min-height: 12px !important;
-              width: 100% !important;
-              clear: both !important;
-          }
-
-          .sg-mail-body,
-          .sg-mail-container,
-          .sg-mail-view md-content,
-          md-card md-content,
-          iframe#messageFrame,
-          iframe {
-              padding-bottom: 12px !important;
-              margin-bottom: 12px !important;
-              box-sizing: border-box !important;
-          }
-
-          /* =========================================
-             3. SIDEBAR FOLDER CAPSULES
-             ========================================= */
           md-sidenav md-subheader,
           md-sidenav .md-subheader,
           md-sidenav .md-subheader-inner,
@@ -236,21 +236,22 @@
               background-color: #e8eaed !important; 
           }
 
-          /* Active Folder Highlight (#d3e3fd) */
+          /* Aktív mappa / Naptár / Címjegyzék */
           md-sidenav md-list-item.md-active,
           md-sidenav md-list-item.sg-item-selected,
           md-sidenav md-list-item.md-active .md-button {
               background-color: #d3e3fd !important; 
           }
 
-          /* Unread Folder Highlight (#eaf1fb) */
+          /* OLVASATLAN MAPPA */
           md-sidenav md-list-item.sg-unread:not(.md-active):not(.sg-item-selected),
           md-sidenav md-list-item.sg-folder-unread:not(.md-active):not(.sg-item-selected),
           md-sidenav md-list-item:has(.sg-badge):not(.md-active):not(.sg-item-selected),
           md-sidenav md-list-item:has(.md-secondary):not(.md-active):not(.sg-item-selected) {
               background-color: #eaf1fb !important;
           }
-          
+
+          /* Naptár és Címjegyzék kereső sávok */
           md-sidenav .sg-filter-input,
           md-sidenav md-toolbar.sg-filter-toolbar,
           md-sidenav form.sg-filter,
@@ -289,7 +290,7 @@
           }
 
           /* =========================================
-             4. EMAIL LIST ITEM CAPSULES
+             4. LEVÉLLISTA ÉS KAPCSOLATLISTA KAPSZULÁK
              ========================================= */
           [id="messagesList"] md-list-item,
           [id="messagesList"] .sg-tile,
@@ -307,7 +308,6 @@
               transition: background-color 0.2s ease !important;
           }
 
-          /* Hover State */
           [id="messagesList"] md-list-item:hover,
           [id="messagesList"] .sg-tile:hover,
           [id="contactsList"] md-list-item:hover,
@@ -316,7 +316,7 @@
           }
 
           /* =========================================
-             5. DIALOGS & POP-UPS
+             5. FELUGRÓ ABLAKOK (DIALOG FIX)
              ========================================= */
           md-dialog,
           .md-dialog-container,
@@ -374,7 +374,7 @@
           }
 
           /* =========================================
-             6. HEADER ICONS, QUOTA & FAB
+             6. FOGASKERÉK, KVÓTA ÉS GOMBOK
              ========================================= */
           .sg-user-info, .sg-user-info *, .sg-user-name, 
           .sg-md-caption, md-sidenav .md-caption {
@@ -420,18 +420,10 @@
       }
     }
 
-    // BASELINE ALIGNMENT ENFORCER
+    // JS HAJSZÁLPONTOS OSZLOP ALAPVONAL ÉS OLDALSÁV TISZTÍTÓ
     function enforceUniformCardBaseline() {
       document.documentElement.style.setProperty('border-bottom', '16px solid #f4f7fc', 'important');
       document.body.style.setProperty('border-bottom', '16px solid #f4f7fc', 'important');
-
-      var wrappers = document.querySelectorAll('[ui-view="list"], [ui-view="detail"]');
-      for (var w = 0; w < wrappers.length; w++) {
-        wrappers[w].style.setProperty('background-color', 'transparent', 'important');
-        wrappers[w].style.setProperty('background', 'transparent', 'important');
-        wrappers[w].style.setProperty('padding-bottom', '0px', 'important');
-        wrappers[w].style.setProperty('margin-bottom', '0px', 'important');
-      }
 
       var sideNavs = document.querySelectorAll('md-sidenav, md-sidenav.md-locked-open, md-sidenav md-content, .sg-calendar-sidebar, .sg-contacts-sidebar, .sg-folder-list');
       for (var s = 0; s < sideNavs.length; s++) {
@@ -513,8 +505,8 @@
       }
     }
 
-    // ACTIVE EMAIL & UNREAD FOLDER SYNCHRONIZER
-    function syncActiveMailAndUnreadFolders() {
+    // INTELLIGENS JS SZINKRONIZÁLÓ (Kijelölt levél / Kapcsolat színezése)
+    function syncActiveItemsAndFolders() {
       var listContainers = document.querySelectorAll('#messagesList, #contactsList, [ui-view="list"], .sg-contacts-list');
       for (var c = 0; c < listContainers.length; c++) {
         var list = listContainers[c];
@@ -579,25 +571,11 @@
           if (hasUnread && !isFolderSelected) {
             folder.style.setProperty('background-color', '#eaf1fb', 'important');
             folder.style.setProperty('border-radius', '24px', 'important');
-            if (innerBtn) {
-              innerBtn.style.setProperty('background-color', '#eaf1fb', 'important');
-              innerBtn.style.setProperty('border-radius', '24px', 'important');
-            }
-            
-            var spans = folder.querySelectorAll('span, div, md-icon');
-            for (var s = 0; s < spans.length; s++) {
-              spans[s].style.setProperty('font-weight', '700', 'important');
-              spans[s].style.setProperty('color', '#041e49', 'important');
-            }
+            if (innerBtn) innerBtn.style.setProperty('background-color', '#eaf1fb', 'important');
           } else if (!hasUnread && !isFolderSelected) {
             if (folder.style.backgroundColor === 'rgb(234, 241, 251)' || folder.style.backgroundColor === '#eaf1fb') {
               folder.style.removeProperty('background-color');
               if (innerBtn) innerBtn.style.removeProperty('background-color');
-              
-              var normalSpans = folder.querySelectorAll('span, div');
-              for (var n = 0; n < normalSpans.length; n++) {
-                normalSpans[n].style.removeProperty('font-weight');
-              }
             }
           }
         }
@@ -629,13 +607,13 @@
     $timeout(function() {
       injectPersistentStyle();
       enforceUniformCardBaseline();
-      syncActiveMailAndUnreadFolders();
+      syncActiveItemsAndFolders();
     }, 100);
 
     $interval(function() {
       injectPersistentStyle();
       enforceUniformCardBaseline();
-      syncActiveMailAndUnreadFolders();
+      syncActiveItemsAndFolders();
     }, 300);
   }
 })();

@@ -1,8 +1,8 @@
-# SOGo Expressive Theme (v1.0.1)
+# SOGo Expressive Theme (v1.0.2)
 
 A modern, clean, and elegant **Material 3 Expressive** theme for **SOGo Webmail 5.x**. 
 
-This theme aggressively overrides SOGo's default AngularJS Material engine to deliver a true, modern Google Workspace (Material You) experience across all major modules.
+This theme aggressively overrides SOGo's default AngularJS Material engine to deliver a true, modern Workspace experience across all major modules.
 
 ![SOGo Expressive Theme Preview](sogo-expressive-theme-screenshot.png)
 
@@ -20,18 +20,30 @@ This theme aggressively overrides SOGo's default AngularJS Material engine to de
 
 ## 🚀 Installation
 
-### Option 1: Direct Integration in SOGo WebServerResources
+### Option 1: Mailcow Dockerized (Recommended)
+
+If you are running Mailcow, you can apply this theme persistently using the built-in custom theme override feature.
+
+1. Save or copy the JavaScript file as `custom-theme.js` inside your Mailcow SOGo configuration directory:
+   ```bash
+   /opt/mailcow-dockerized/data/conf/sogo/custom-theme.js
+   ```
+
+2. Restart the SOGo container to apply the changes:
+   ```bash
+   docker compose restart sogo-mailcow
+   ```
+
+### Option 2: Direct Integration in SOGo WebServerResources
 
 1. Download the `sogo-expressive-theme.js` file from this repository.
 2. Place the script inside your SOGo web resources directory:
-
    ```bash
    /usr/lib/GNUstep/SOGo/WebServerResources/js/sogo-expressive-theme.js
    ```
-
 3. Include the script inside SOGo's HTML template or append it to your custom theme setup.
 
-### Option 2: Injection via Web Server (Nginx / Apache) or Custom JS
+### Option 3: Injection via Web Server (Nginx / Apache) or Custom JS
 
 If you are using a reverse proxy (Nginx or Apache) in front of SOGo, you can automatically inject the JavaScript file into SOGo's HTML output using `sub_filter` or custom Javascript inclusion headers.
 
