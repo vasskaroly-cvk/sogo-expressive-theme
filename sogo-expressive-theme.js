@@ -2,20 +2,16 @@
  * ============================================================================
  * SOGo Webmail - Modern Expressive (Material 3) Theme
  * Repository: https://github.com/vasskaroly-cvk/sogo-expressive-theme
- * Version: 2.0.0
+ * Version: 2.1.0
  * Author: Károly Vass (cvk.hu)
  * License: MIT
- * 
- * Description: 
- * A complete overhaul of the SOGo Webmail interface bringing Google's Material 3
- * (Expressive) design language. Features include seamless Light/Dark mode, 
- * floating 3D cards, modern pill-shaped highlights, optimized calendar events,
- * and intelligent iframe dark-mode injection for emails.
  * ============================================================================
  */
 
 (function() {
   'use strict';
+
+  console.log('SOGo Expressive Theme v2.1.0 loading...');
 
   angular.module('SOGo.Common')
     .config(configure)
@@ -82,7 +78,6 @@
       else isDark = prefersDark;
 
       if (isDark) {
-        // SÖTÉT MÓD (Expressive Dark)
         return {
           isDark: true,
           bgMain: '#2e3b4b',          
@@ -103,17 +98,16 @@
           border: '#273342'           
         };
       } else {
-        // VILÁGOS MÓD (Expressive Light)
         return {
           isDark: false,
           bgMain: '#f4f7fc',
           bgCard: '#ffffff',
           bgHover: '#e8eaed',
-          bgActiveFolder: '#d3e3fd',
+          bgActiveFolder: '#c2e7ff',
           textActiveFolder: '#041e49',
           bgActivePill: '#c2e7ff',
           textActivePill: '#041e49',
-          bgUnreadFolder: '#eaf1fb',
+          bgUnreadFolder: '#d3e3fd',
           textMain: '#202124',
           textPrimary: '#041e49',
           textMuted: '#5f6368',
@@ -146,8 +140,9 @@
       return folder.classList.contains('md-active') ||
              folder.classList.contains('sg-item-selected') ||
              folder.classList.contains('sg-folder-selected') ||
+             (folder.classList.contains('md-bg') && folder.classList.contains('md-hue-2')) ||
              folder.getAttribute('aria-selected') === 'true' ||
-             folder.querySelector('.md-active, .sg-item-selected, .sg-folder-selected, [aria-selected="true"]') !== null;
+             folder.querySelector('.md-active, .sg-item-selected, .sg-folder-selected, .md-bg.md-hue-2, [aria-selected="true"]') !== null;
     }
 
     function injectPersistentStyle() {
@@ -186,7 +181,6 @@
             background-color: ${colors.bgMain} !important;
             height: 100vh !important;
             max-height: 100vh !important;
-            border-bottom: 16px solid ${colors.bgMain} !important;
             box-sizing: border-box !important;
             overflow: hidden !important;
             color: ${colors.textMain} !important;
@@ -207,7 +201,7 @@
         /* =========================================
            2. A NAGY DOBOZOK FORMÁJA ÉS EGYENES ALSÓ ALAPVONALA
            ========================================= */
-        [ui-view="list"], [ui-view="detail"], [ui-view="calendars"], [ui-view="calendar"], [ui-view="contacts"] {
+        [ui-view="list"], [ui-view="detail"], [ui-view="calendars"], [ui-view="calendar"], [ui-view="contacts"], [ui-view="preferences"] {
             background-color: transparent !important;
             background: transparent !important;
             box-sizing: border-box !important;
@@ -225,9 +219,9 @@
         .sg-list md-content {
             background-color: ${colors.bgCard} !important;
             border-radius: 24px !important;
-            margin: 8px 4px 0px 6px !important;
-            height: calc(100% - 8px) !important;
-            max-height: calc(100% - 8px) !important;
+            margin: 8px 4px 8px 6px !important;
+            height: calc(100% - 16px) !important;
+            max-height: calc(100% - 16px) !important;
             box-shadow: ${shadow3D} !important;
             overflow: hidden !important;
             border: none !important;
@@ -251,9 +245,9 @@
             border-top-right-radius: 0 !important;
             border-bottom-left-radius: 24px !important;
             border-bottom-right-radius: 24px !important;
-            margin: 0 12px 0px 4px !important;
-            height: 100% !important;
-            max-height: 100% !important;
+            margin: 0 12px 8px 4px !important;
+            height: calc(100% - 8px) !important;
+            max-height: calc(100% - 8px) !important;
             box-shadow: ${shadow3D} !important;
             overflow: hidden !important;
             border: none !important;
@@ -320,7 +314,9 @@
             color: ${colors.isDark ? '#a0b3c6' : '#5f6368'} !important;
         }
 
-        .sg-mail-headers a, .sg-mail-header-values a, .sg-mail-view a, md-card a {
+        .sg-mail-headers a, 
+        .sg-mail-header-values a, 
+        .sg-mail-attachments a {
             color: ${colors.accentBtn} !important;
             text-decoration: underline !important;
         }
@@ -358,9 +354,9 @@
             border-top-right-radius: 0 !important;
             border-bottom-left-radius: 24px !important;
             border-bottom-right-radius: 24px !important;
-            margin-bottom: 0 !important;
-            height: 100% !important;
-            max-height: 100% !important;
+            margin-bottom: 8px !important;
+            height: calc(100% - 8px) !important;
+            max-height: calc(100% - 8px) !important;
             overflow: hidden !important;
             box-sizing: border-box !important;
         }
@@ -400,35 +396,56 @@
             background-color: ${colors.bgHover} !important; 
         }
 
-        md-sidenav md-list-item.md-active,
-        md-sidenav md-list-item.sg-item-selected,
-        md-sidenav md-list-item.sg-folder-selected,
-        md-sidenav md-list-item.md-active .md-button,
-        md-sidenav md-list-item.sg-item-selected .md-button,
-        md-sidenav md-list-item.md-active .md-no-style,
-        md-sidenav md-list-item.sg-item-selected .md-no-style,
-        .sg-folder-list md-list-item.md-active,
-        .sg-folder-list md-list-item.md-active .md-button {
+        /* Sötét mód aktív mappa CSS kényszerítés (Fehér kapszula) */
+        html.sogo-dark md-sidenav md-list-item.md-active,
+        html.sogo-dark md-sidenav md-list-item.sg-item-selected,
+        html.sogo-dark md-sidenav md-list-item.sg-folder-selected,
+        html.sogo-dark md-sidenav md-list-item.md-bg.md-hue-2,
+        html.sogo-dark md-sidenav md-list-item.md-active .md-button,
+        html.sogo-dark md-sidenav md-list-item.sg-item-selected .md-button,
+        html.sogo-dark md-sidenav md-list-item.md-bg.md-hue-2 .md-button,
+        html.sogo-dark md-sidenav md-list-item.md-active .md-no-style,
+        html.sogo-dark md-sidenav md-list-item.sg-item-selected .md-no-style {
+            background-color: #ffffff !important; 
+            background: #ffffff !important; 
+        }
+
+        html.sogo-dark md-sidenav md-list-item.md-active *,
+        html.sogo-dark md-sidenav md-list-item.sg-item-selected *,
+        html.sogo-dark md-sidenav md-list-item.sg-folder-selected *,
+        html.sogo-dark md-sidenav md-list-item.md-bg.md-hue-2 * {
+            color: #041e49 !important;
+            fill: #041e49 !important;
+            font-weight: 700 !important;
+        }
+
+        /* Világos mód aktív mappa */
+        html.sogo-light md-sidenav md-list-item.md-active,
+        html.sogo-light md-sidenav md-list-item.sg-item-selected,
+        html.sogo-light md-sidenav md-list-item.sg-folder-selected,
+        html.sogo-light md-sidenav md-list-item.md-bg.md-hue-2,
+        html.sogo-light md-sidenav md-list-item.md-active .md-button,
+        html.sogo-light md-sidenav md-list-item.sg-item-selected .md-button,
+        html.sogo-light md-sidenav md-list-item.md-bg.md-hue-2 .md-button,
+        html.sogo-light md-sidenav md-list-item.md-active .md-no-style,
+        html.sogo-light md-sidenav md-list-item.sg-item-selected .md-no-style {
             background-color: ${colors.bgActiveFolder} !important; 
             background: ${colors.bgActiveFolder} !important; 
         }
 
-        md-sidenav md-list-item.md-active *,
-        md-sidenav md-list-item.sg-item-selected *,
-        md-sidenav md-list-item.sg-folder-selected *,
-        md-sidenav md-list-item.md-active md-icon,
-        md-sidenav md-list-item.sg-item-selected md-icon,
-        md-sidenav md-list-item.md-active md-icon svg,
-        md-sidenav md-list-item.sg-item-selected md-icon svg {
+        html.sogo-light md-sidenav md-list-item.md-active *,
+        html.sogo-light md-sidenav md-list-item.sg-item-selected *,
+        html.sogo-light md-sidenav md-list-item.sg-folder-selected *,
+        html.sogo-light md-sidenav md-list-item.md-bg.md-hue-2 * {
             color: ${colors.textActiveFolder} !important;
             fill: ${colors.textActiveFolder} !important;
             font-weight: 700 !important;
         }
 
-        md-sidenav md-list-item.sg-unread:not(.md-active):not(.sg-item-selected),
-        md-sidenav md-list-item.sg-folder-unread:not(.md-active):not(.sg-item-selected),
-        md-sidenav md-list-item:has(.sg-badge):not(.md-active):not(.sg-item-selected),
-        md-sidenav md-list-item:has(.md-secondary):not(.md-active):not(.sg-item-selected) {
+        md-sidenav md-list-item.sg-unread:not(.md-active):not(.sg-item-selected):not(.md-bg),
+        md-sidenav md-list-item.sg-folder-unread:not(.md-active):not(.sg-item-selected):not(.md-bg),
+        md-sidenav md-list-item:has(.sg-badge):not(.md-active):not(.sg-item-selected):not(.md-bg),
+        md-sidenav md-list-item:has(.md-secondary):not(.md-active):not(.sg-item-selected):not(.md-bg) {
             background-color: ${colors.bgUnreadFolder} !important;
         }
 
@@ -470,22 +487,34 @@
             font-weight: 500 !important;
         }
 
-        md-switch, md-switch *, md-checkbox, md-checkbox * {
-            background-color: initial !important;
-            border-color: initial !important;
-        }
-
         /* =========================================
            4. LEVÉLLISTA KAPSZULÁK ÉS KIEMELÉSEK
            ========================================= */
-        [id="messagesList"] md-list-item,
-        [id="messagesList"] .sg-tile,
-        [id="messagesList"] .sg-list-item,
-        [id="contactsList"] md-list-item,
-        [id="contactsList"] .sg-tile,
-        [id="contactsList"] .sg-list-item,
-        .sg-contacts-list md-list-item,
-        .sg-list md-list-item {
+        
+        /* "1399 üzenet" sáv javítása */
+        [id="messagesList"] md-subheader,
+        [id="messagesList"] .md-subheader,
+        [id="messagesList"] .md-subheader-inner,
+        .sg-list-divider {
+            background-color: transparent !important;
+            background: transparent !important;
+            color: ${colors.textMuted} !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        [id="messagesList"] md-subheader *,
+        [id="messagesList"] .md-subheader *,
+        .sg-list-divider * {
+            color: ${colors.textMuted} !important;
+            background-color: transparent !important;
+        }
+
+        [ui-view="list"] md-list-item,
+        [ui-view="contacts"] md-list-item,
+        #messagesList md-list-item,
+        #contactsList md-list-item,
+        [ui-view="list"] .sg-tile,
+        [ui-view="contacts"] .sg-tile {
             margin: 2px 10px !important;
             width: calc(100% - 20px) !important;
             max-width: calc(100% - 20px) !important;
@@ -496,10 +525,9 @@
             color: ${colors.textMain} !important;
         }
 
-        .sg-list md-list-item:not(.md-bg):not(.md-active):not(.sg-item-selected):not(.sg-message-selected):not(.sg-star-bg) *,
-        .sg-list .sg-tile:not(.md-bg):not(.md-active):not(.sg-item-selected):not(.sg-message-selected):not(.sg-star-bg) *,
-        [id="messagesList"] md-list-item:not(.md-bg):not(.md-active):not(.sg-item-selected):not(.sg-message-selected):not(.sg-star-bg) *,
-        [id="messagesList"] .sg-tile:not(.md-bg):not(.md-active):not(.sg-item-selected):not(.sg-message-selected):not(.sg-star-bg) * {
+        [ui-view="list"] md-list-item:not(.md-bg):not(.md-active):not(.sg-item-selected):not(.sg-message-selected):not(.sg-star-bg) *,
+        [ui-view="contacts"] md-list-item:not(.md-bg):not(.md-active):not(.sg-item-selected):not(.sg-message-selected):not(.sg-star-bg) *,
+        #messagesList md-list-item:not(.md-bg):not(.md-active):not(.sg-item-selected):not(.sg-message-selected):not(.sg-star-bg) * {
             color: ${colors.textMain} !important;
         }
 
@@ -508,63 +536,50 @@
         [id="messagesList"] .sg-size,
         [id="messagesList"] .sg-tile-subtitle,
         [id="messagesList"] .sg-snippet,
-        .sg-list .sg-date,
-        .sg-list .sg-size {
+        [ui-view="list"] .sg-date,
+        [ui-view="list"] .sg-size {
             color: ${colors.textMuted} !important;
         }
 
-        [id="messagesList"] md-list-item:hover,
-        [id="messagesList"] .sg-tile:hover,
-        [id="contactsList"] md-list-item:hover,
-        [id="contactsList"] .sg-tile:hover { 
+        [ui-view="list"] md-list-item:hover,
+        [ui-view="contacts"] md-list-item:hover,
+        #messagesList md-list-item:hover,
+        #contactsList md-list-item:hover { 
             background-color: ${colors.bgHover} !important; 
         }
 
-        [id="messagesList"] md-list-item.md-bg.md-hue-2,
-        [id="messagesList"] md-list-item.md-active,
-        [id="messagesList"] md-list-item.sg-item-selected,
-        [id="messagesList"] md-list-item.sg-message-selected,
-        [id="messagesList"] md-list-item[aria-selected="true"],
-        [id="messagesList"] .sg-tile.md-active,
-        [id="messagesList"] .sg-tile.sg-item-selected,
-        .sg-list md-list-item.md-bg.md-hue-2,
-        .sg-list md-list-item.md-active,
-        .sg-list md-list-item.sg-item-selected,
-        .sg-list md-list-item.sg-message-selected {
+        [ui-view="list"] md-list-item.md-bg.md-hue-2,
+        [ui-view="list"] md-list-item.md-active,
+        [ui-view="list"] md-list-item.sg-item-selected,
+        [ui-view="list"] md-list-item.sg-message-selected,
+        #messagesList md-list-item.md-bg.md-hue-2,
+        #messagesList md-list-item.md-active,
+        #messagesList md-list-item.sg-item-selected,
+        #messagesList md-list-item.sg-message-selected {
             background-color: ${colors.bgActivePill} !important;
             background: ${colors.bgActivePill} !important;
         }
 
-        .md-bg.md-hue-2 *,
-        .sg-message-selected *,
-        [id="messagesList"] md-list-item.md-bg.md-hue-2 *,
-        [id="messagesList"] md-list-item.md-active *,
-        [id="messagesList"] md-list-item.sg-item-selected *,
-        [id="messagesList"] md-list-item.sg-message-selected *,
-        [id="messagesList"] md-list-item[aria-selected="true"] *,
-        [id="messagesList"] .sg-tile.md-active *,
-        [id="messagesList"] .sg-tile.sg-item-selected *,
-        .sg-list md-list-item.md-bg.md-hue-2 *,
-        .sg-list md-list-item.md-active *,
-        .sg-list md-list-item.sg-item-selected *,
-        .sg-list md-list-item.sg-message-selected * {
+        [ui-view="list"] md-list-item.md-bg.md-hue-2 *,
+        [ui-view="list"] md-list-item.md-active *,
+        [ui-view="list"] md-list-item.sg-item-selected *,
+        [ui-view="list"] md-list-item.sg-message-selected *,
+        #messagesList md-list-item.md-bg.md-hue-2 *,
+        #messagesList md-list-item.md-active *,
+        #messagesList md-list-item.sg-item-selected *,
+        #messagesList md-list-item.sg-message-selected * {
             color: #041e49 !important;
             fill: #041e49 !important;
         }
 
-        [id="messagesList"] md-list-item.sg-star-bg:not(.md-bg),
-        .sg-list md-list-item.sg-star-bg:not(.md-bg) {
+        [ui-view="list"] md-list-item.sg-star-bg:not(.md-bg),
+        #messagesList md-list-item.sg-star-bg:not(.md-bg) {
             background-color: #fef08a !important;
             background: #fef08a !important;
         }
 
-        [id="messagesList"] md-list-item.sg-star-bg *,
-        .sg-list md-list-item.sg-star-bg *,
-        .sg-star-bg .md-button,
-        .sg-star-bg .md-no-style,
-        .sg-star-bg button,
-        .sg-star-bg .md-list-item-inner,
-        .sg-star-bg .sg-tile-content {
+        [ui-view="list"] md-list-item.sg-star-bg *,
+        #messagesList md-list-item.sg-star-bg * {
             color: #041e49 !important;
             fill: #041e49 !important;
         }
@@ -572,8 +587,6 @@
         /* =========================================
            5. NAPTÁR ESEMÉNYEK KAPSZULA ÉS LISTA KINÉZET JAVÍTÁS
            ========================================= */
-        
-        /* ALAPVETŐ FORMA ÉS ÁRNYÉK MINDEN ESEMÉNYRE (Középső lista ÉS jobb oldali rács) */
         .sg-calendar-event-list .sg-tile,
         .sg-calendar-event-list md-list-item,
         .sg-calendar-event,
@@ -584,10 +597,9 @@
             border-radius: 8px !important;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
             border: none !important;
-            overflow: hidden !important; /* Vágja a kilógó sávokat */
+            overflow: hidden !important;
         }
 
-        /* KÜLÖN BEÁLLÍTÁS A KÖZÉPSŐ OSZLOP (AGENDA) LISTAELEMEIRE */
         .sg-calendar-event-list .sg-tile,
         .sg-calendar-event-list md-list-item {
             height: auto !important;
@@ -598,7 +610,6 @@
             box-sizing: border-box !important;
         }
 
-        /* A BELSŐ ELEMEK VÉDELME: Ne kapjanak saját árnyékot, ami "szellemképessé" teszi őket */
         .sg-calendar-event *,
         .sg-event *,
         .sg-calendar-event-list .sg-tile *,
@@ -614,7 +625,6 @@
             margin: 0 !important;
         }
 
-        /* SZÖVEGEK ÉS IKONOK KONTRAZTJA (Hogy a világos zöld/sárga naptárszíneken is olvasható legyen) */
         .sg-calendar-event-list .sg-tile *,
         .sg-calendar-event-title,
         .sg-calendar-event-location,
@@ -627,7 +637,6 @@
             font-weight: 500 !important;
         }
 
-        /* Ikonok árnyékolása (pl. helyszín ikon) */
         .sg-calendar-event-list md-icon,
         .sg-calendar-event md-icon,
         .sg-event md-icon {
@@ -725,8 +734,9 @@
             flex: 1 1 0% !important;
             min-width: 0 !important;
             min-height: 0 !important;
-            height: 100% !important;
-            max-height: 100% !important;
+            height: calc(100% - 8px) !important;
+            max-height: calc(100% - 8px) !important;
+            margin-bottom: 8px !important;
             background-color: ${colors.bgCard} !important;
             border-radius: 24px !important;
             box-shadow: ${shadow3D} !important;
@@ -895,11 +905,7 @@
         md-dialog md-select-value,
         md-dialog .md-select-value,
         md-dialog label,
-        md-dialog span,
-        md-dialog div,
         md-dialog p,
-        md-dialog md-radio-button .md-label,
-        md-dialog md-checkbox .md-label,
         md-dialog .md-subhead,
         md-dialog .md-caption {
             color: ${colors.textPrimary} !important;
@@ -918,8 +924,7 @@
             background-color: transparent !important;
         }
 
-        md-dialog md-radio-button .md-off,
-        md-dialog md-checkbox .md-icon {
+        md-dialog md-radio-button .md-off {
             border-color: ${colors.textMuted} !important;
         }
 
@@ -948,17 +953,6 @@
             color: ${colors.textMuted} !important; 
         }
         
-        md-sidenav md-toolbar md-icon,
-        md-sidenav md-toolbar md-icon svg,
-        md-sidenav md-toolbar button md-icon,
-        md-sidenav md-toolbar button md-icon svg,
-        .sg-user-info md-icon, 
-        .sg-user-info md-icon svg {
-            color: ${colors.textPrimary} !important;
-            fill: ${colors.textPrimary} !important;
-            opacity: 1 !important; 
-        }
-        
         md-progress-linear .md-container {
             background-color: ${colors.bgUnreadFolder} !important; 
             border-radius: 4px !important;
@@ -982,47 +976,257 @@
         ::-webkit-scrollbar-thumb { background: ${colors.border} !important; border-radius: 4px !important; }
 
         /* ====================================================================
-           SÖTÉT MÓD JAVÍTÁSOK (Expressive Dark)
+           10. BEÁLLÍTÁSOK (SETTINGS), ŰRLAPOK ÉS ÜRES ÁLLAPOTOK
            ========================================= */
         
-        #sogo-theme-toggle-btn { outline: none !important; box-shadow: none !important; }
-        #sogo-theme-toggle-btn:focus { outline: none !important; box-shadow: none !important; }
+        /* "Nincs kijelölt üzenet" és hasonló üres állapotok szövege */
+        [ui-view="detail"] .text-muted,
+        [ui-view="detail"] .md-headline,
+        .sg-empty-message,
+        .sg-empty-message * {
+            color: ${colors.textPrimary} !important;
+            font-weight: 600 !important;
+        }
 
-        ${colors.isDark ? `
-        html.sogo-dark .md-subheader.md-default-theme,
-        html.sogo-dark .md-subheader {
+        /* BEÁLLÍTÁSOK HÁTTÉR FIX (Sötét módban eltünteti a fehér hátteret) */
+        [ui-view="preferences"] md-content,
+        [ui-view="preferences"] md-tabs-content-wrapper,
+        [ui-view="preferences"] md-tab-content,
+        [ui-view="preferences"] md-tab-content > div,
+        [ui-view="preferences"] .md-bg {
             background-color: ${colors.bgCard} !important;
-            color: ${colors.textMain} !important;
-        }
-        html.sogo-dark .md-subheader .md-subheader-inner,
-        html.sogo-dark .md-subheader .md-subheader-content {
-            background-color: transparent !important;
+            background: ${colors.bgCard} !important;
             color: ${colors.textMain} !important;
         }
 
+        /* Beállítások menü fülek (Tabs) */
+        md-tabs .md-tab,
+        md-tabs .md-tab * {
+            color: ${colors.textMain} !important;
+        }
+        md-tabs .md-tab.md-active,
+        md-tabs .md-tab.md-active * {
+            color: ${colors.accentBtn} !important;
+            font-weight: 700 !important;
+        }
+
+        /* Beállítások szövegei */
+        [ui-view="preferences"] .md-list-item-text,
+        [ui-view="preferences"] .md-list-item-inner,
+        [ui-view="preferences"] md-checkbox .md-label,
+        [ui-view="preferences"] md-checkbox .md-label span,
+        [ui-view="preferences"] md-radio-button .md-label,
+        [ui-view="preferences"] md-radio-button .md-label span,
+        [ui-view="preferences"] .md-subhead,
+        [ui-view="preferences"] label,
+        [ui-view="preferences"] .md-body-1,
+        [ui-view="preferences"] .md-body-2 {
+            color: ${colors.textPrimary} !important;
+        }
+
+        /* Checkbox és Radio gombok sötét/világos mód fix */
+        md-checkbox.md-checked .md-icon:after {
+            border-color: #ffffff !important;
+        }
+        html.sogo-light md-checkbox:not(.md-checked) .md-icon,
+        html.sogo-light md-radio-button:not(.md-checked) .md-off {
+            border-color: #5f6368 !important;
+        }
+        html.sogo-dark md-checkbox:not(.md-checked) .md-icon,
+        html.sogo-dark md-radio-button:not(.md-checked) .md-off {
+            border-color: #8b9eb0 !important;
+        }
+
+        /* Űrlap mezők (Input) és Legördülő menük (Select) sötét módban */
+        html.sogo-dark md-input-container .md-input {
+            color: ${colors.textPrimary} !important;
+            border-color: ${colors.border} !important;
+        }
+        html.sogo-dark md-input-container label,
+        html.sogo-dark md-input-container .md-placeholder {
+            color: ${colors.textMuted} !important;
+        }
+        html.sogo-dark .md-select-menu-container md-content,
+        html.sogo-dark md-select-menu,
+        html.sogo-dark md-select-menu md-content {
+            background-color: ${colors.bgCard} !important;
+            border: 1px solid ${colors.border} !important;
+        }
+        html.sogo-dark md-option {
+            color: ${colors.textPrimary} !important;
+        }
+        html.sogo-dark md-option:hover, 
+        html.sogo-dark md-option:focus {
+            background-color: ${colors.bgHover} !important;
+        }
+        html.sogo-dark md-option.md-selected {
+            color: ${colors.accentBtn} !important;
+        }
+        html.sogo-dark md-select-value {
+            color: ${colors.textPrimary} !important;
+            border-bottom-color: ${colors.border} !important;
+        }
+
+        /* ====================================================================
+           11. MINDEN IKON ANIMÁCIÓJA ÉS SZÍNEZÉSE (HOVER)
+           ========================================= */
+        
+        /* Alap ikon átmenet (Minden gomb és lista ikon) */
+        button.md-icon-button md-icon,
+        button.md-icon-button md-icon svg,
+        a.md-icon-button md-icon,
+        a.md-icon-button md-icon svg,
+        md-list-item .md-secondary md-icon,
+        md-list-item .md-secondary md-icon svg,
+        md-toolbar md-icon,
+        md-toolbar md-icon svg,
+        .sg-header md-icon,
+        .sg-header md-icon svg,
+        .sg-user-info md-icon, 
+        .sg-user-info md-icon svg,
+        .sg-mail-view md-icon,
+        #mailView md-icon,
+        md-card md-icon {
+            transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+            opacity: 1 !important;
+        }
+
+        /* VILÁGOS MÓD IKONOK (Sötétkék) */
+        html.sogo-light md-toolbar md-icon,
+        html.sogo-light md-toolbar md-icon svg,
+        html.sogo-light .sg-header md-icon,
+        html.sogo-light .sg-header md-icon svg,
+        html.sogo-light button.md-icon-button md-icon,
+        html.sogo-light button.md-icon-button md-icon svg,
+        html.sogo-light a.md-icon-button md-icon,
+        html.sogo-light a.md-icon-button md-icon svg,
+        html.sogo-light md-card-actions md-icon,
+        html.sogo-light md-card-actions md-icon svg,
+        html.sogo-light md-fab-speed-dial md-icon,
+        html.sogo-light md-fab-speed-dial md-icon svg,
+        html.sogo-light #detailView md-icon,
+        html.sogo-light #detailView md-icon svg,
+        html.sogo-light #mailView md-icon,
+        html.sogo-light #mailView md-icon svg,
+        html.sogo-light .sg-card-actions md-icon,
+        html.sogo-light .sg-card-actions md-icon svg {
+            color: ${colors.textPrimary} !important; /* Sötétkék (#041e49) */
+            fill: ${colors.textPrimary} !important;
+        }
+
+        /* VILÁGOS MÓD HOVER (Csak nagyítás, szín marad) */
+        html.sogo-light button.md-icon-button:hover md-icon,
+        html.sogo-light button.md-icon-button:hover md-icon svg,
+        html.sogo-light a.md-icon-button:hover md-icon,
+        html.sogo-light a.md-icon-button:hover md-icon svg,
+        html.sogo-light md-list-item .md-secondary:hover md-icon,
+        html.sogo-light md-list-item .md-secondary:hover md-icon svg,
+        html.sogo-light md-card-actions button:hover md-icon,
+        html.sogo-light md-card-actions button:hover md-icon svg,
+        html.sogo-light .sg-user-info:hover md-icon,
+        html.sogo-light .sg-user-info:hover md-icon svg,
+        html.sogo-light .sg-mail-view a:hover md-icon,
+        html.sogo-light .sg-mail-view button:hover md-icon,
+        html.sogo-light #mailView a:hover md-icon,
+        html.sogo-light #mailView button:hover md-icon {
+            transform: scale(1.15) !important; 
+        }
+
+        /* SÖTÉT MÓD IKONOK (Kiterjesztve a levélolvasó ikonjaira is) */
+        html.sogo-dark button.md-icon-button md-icon,
+        html.sogo-dark button.md-icon-button md-icon svg,
+        html.sogo-dark a.md-icon-button md-icon,
+        html.sogo-dark a.md-icon-button md-icon svg,
+        html.sogo-dark md-list-item .md-secondary md-icon,
+        html.sogo-dark md-list-item .md-secondary md-icon svg,
         html.sogo-dark md-toolbar md-icon,
         html.sogo-dark md-toolbar md-icon svg,
         html.sogo-dark .sg-header md-icon,
         html.sogo-dark .sg-header md-icon svg,
-        html.sogo-dark button.md-icon-button md-icon,
-        html.sogo-dark button.md-icon-button md-icon svg,
-        html.sogo-dark md-card-actions md-icon,
-        html.sogo-dark md-card-actions md-icon svg,
-        html.sogo-dark md-card-actions .material-icons,
-        html.sogo-dark md-card-actions button,
-        html.sogo-dark md-fab-speed-dial md-icon,
-        html.sogo-dark md-fab-speed-dial md-icon svg,
-        html.sogo-dark #detailView md-icon,
-        html.sogo-dark #detailView md-icon svg,
+        html.sogo-dark .sg-user-info md-icon, 
+        html.sogo-dark .sg-user-info md-icon svg,
         html.sogo-dark #mailView md-icon,
         html.sogo-dark #mailView md-icon svg,
-        html.sogo-dark .sg-card-actions md-icon,
-        html.sogo-dark .sg-card-actions md-icon svg {
+        html.sogo-dark .sg-mail-view md-icon,
+        html.sogo-dark .sg-mail-view md-icon svg,
+        html.sogo-dark md-card-actions md-icon,
+        html.sogo-dark md-card-actions md-icon svg,
+        html.sogo-dark md-card md-icon,
+        html.sogo-dark md-card md-icon svg {
             color: #ffffff !important;
             fill: #ffffff !important;
-            opacity: 1 !important;
         }
-        ` : ''}
+
+        /* SÖTÉT MÓD HOVER (Agresszív szelektor a levélolvasó linkjeire is) */
+        html.sogo-dark button.md-icon-button:hover md-icon,
+        html.sogo-dark button.md-icon-button:hover md-icon svg,
+        html.sogo-dark a.md-icon-button:hover md-icon,
+        html.sogo-dark a.md-icon-button:hover md-icon svg,
+        html.sogo-dark md-list-item .md-secondary:hover md-icon,
+        html.sogo-dark md-list-item .md-secondary:hover md-icon svg,
+        html.sogo-dark .sg-user-info:hover md-icon,
+        html.sogo-dark .sg-user-info:hover md-icon svg,
+        html.sogo-dark .sg-mail-view a:hover md-icon,
+        html.sogo-dark .sg-mail-view button:hover md-icon,
+        html.sogo-dark #mailView a:hover md-icon,
+        html.sogo-dark #mailView button:hover md-icon,
+        html.sogo-dark md-card a:hover md-icon,
+        html.sogo-dark md-card button:hover md-icon {
+            transform: scale(1.2) !important; 
+            color: #ffffff !important; 
+            fill: #ffffff !important;
+        }
+
+        /* ====================================================================
+           12. LEGÖRDÜLŐ MENÜK (MD-MENU) DARK MODE FIX
+           ========================================= */
+        /* Agresszív konténer célzás a szűrő menühöz */
+        html.sogo-dark .md-open-menu-container,
+        html.sogo-dark .md-open-menu-container md-menu-content,
+        html.sogo-dark .md-menu-container,
+        html.sogo-dark md-menu-content,
+        html.sogo-dark .md-menu-content {
+            background-color: ${colors.bgCard} !important;
+            background: ${colors.bgCard} !important;
+            border: 1px solid ${colors.border} !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6) !important;
+            padding: 8px 0 !important;
+        }
+        
+        html.sogo-dark md-menu-content md-menu-item,
+        html.sogo-dark md-menu-content md-menu-item .md-button,
+        html.sogo-dark md-menu-content md-menu-item a {
+            color: #ffffff !important;
+            background-color: transparent !important;
+            transition: background-color 0.2s ease !important;
+        }
+        
+        html.sogo-dark md-menu-content md-menu-item:hover,
+        html.sogo-dark md-menu-content md-menu-item .md-button:hover,
+        html.sogo-dark md-menu-content md-menu-item a:hover {
+            background-color: ${colors.bgHover} !important;
+        }
+        
+        html.sogo-dark md-menu-content md-icon:not([style*="color"]) {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+        }
+        
+        html.sogo-dark md-menu-divider,
+        html.sogo-dark md-menu-content md-divider {
+            border-top-color: ${colors.border} !important;
+        }
+        
+        html.sogo-dark md-menu-content * {
+            color: #ffffff !important;
+        }
+
+        /* Megvédjük a színes pöttyöket a kifehérítéstől */
+        html.sogo-dark md-menu-content .sg-color-chip,
+        html.sogo-dark md-menu-content [style*="background-color"] {
+            color: inherit !important;
+        }
       `;
     }
 
@@ -1075,10 +1279,7 @@
         ? '0 12px 32px rgba(0, 0, 0, 0.75), 0 0 24px rgba(255, 255, 255, 0.22), 0 2px 8px rgba(255, 255, 255, 0.15)' 
         : '0 12px 28px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.08)';
 
-      document.documentElement.style.setProperty('border-bottom', '16px solid ' + colors.bgMain, 'important');
-      document.body.style.setProperty('border-bottom', '16px solid ' + colors.bgMain, 'important');
-
-      var parentContainers = document.querySelectorAll('[ui-view="list"], [ui-view="detail"], [ui-view="contacts"]');
+      var parentContainers = document.querySelectorAll('[ui-view="list"], [ui-view="detail"], [ui-view="contacts"], [ui-view="preferences"]');
       for (var p = 0; p < parentContainers.length; p++) {
         parentContainers[p].style.setProperty('overflow', 'visible', 'important');
       }
@@ -1094,27 +1295,28 @@
         sn.style.setProperty('border-top-right-radius', '0px', 'important');
         sn.style.setProperty('border-bottom-left-radius', '24px', 'important');
         sn.style.setProperty('border-bottom-right-radius', '24px', 'important');
-        sn.style.setProperty('margin-bottom', '0px', 'important');
-        sn.style.setProperty('height', '100%', 'important');
-        sn.style.setProperty('max-height', '100%', 'important');
+        sn.style.setProperty('margin-bottom', '8px', 'important');
+        sn.style.setProperty('height', 'calc(100% - 8px)', 'important');
+        sn.style.setProperty('max-height', 'calc(100% - 8px)', 'important');
         sn.style.setProperty('overflow', 'hidden', 'important');
       }
 
-      var subHeaders = document.querySelectorAll('md-sidenav md-subheader, md-sidenav .md-subheader, md-sidenav .md-subheader-inner, md-sidenav md-list, md-sidenav .sg-calendar-list, md-sidenav .sg-contacts-list');
+      var subHeaders = document.querySelectorAll('md-sidenav md-subheader, md-sidenav .md-subheader, md-sidenav .md-subheader-inner, md-sidenav md-list, md-sidenav .sg-calendar-list, md-sidenav .sg-contacts-list, [id="messagesList"] md-subheader, [id="messagesList"] .md-subheader, [id="messagesList"] .md-subheader-inner, .sg-list-divider');
       for (var sh = 0; sh < subHeaders.length; sh++) {
         subHeaders[sh].style.setProperty('background-color', 'transparent', 'important');
         subHeaders[sh].style.setProperty('background', 'transparent', 'important');
         subHeaders[sh].style.setProperty('box-shadow', 'none', 'important');
         subHeaders[sh].style.setProperty('border', 'none', 'important');
+        subHeaders[sh].style.setProperty('color', colors.textMuted, 'important');
       }
 
       var listCards = document.querySelectorAll('#messagesList, #contactsList, .sg-list, .sg-contacts-list');
       for (var l = 0; l < listCards.length; l++) {
         var lc = listCards[l];
         lc.style.setProperty('border-radius', '24px', 'important');
-        lc.style.setProperty('margin', '8px 4px 0px 6px', 'important');
-        lc.style.setProperty('height', 'calc(100% - 8px)', 'important');
-        lc.style.setProperty('max-height', 'calc(100% - 8px)', 'important');
+        lc.style.setProperty('margin', '8px 4px 8px 6px', 'important');
+        lc.style.setProperty('height', 'calc(100% - 16px)', 'important');
+        lc.style.setProperty('max-height', 'calc(100% - 16px)', 'important');
         lc.style.setProperty('overflow', 'hidden', 'important');
         lc.style.setProperty('background-color', colors.bgCard, 'important');
         lc.style.setProperty('box-shadow', shadow3D, 'important');
@@ -1141,6 +1343,7 @@
         calCard.style.setProperty('min-width', '0', 'important');
         calCard.style.setProperty('height', 'calc(100% - 8px)', 'important');
         calCard.style.setProperty('max-height', 'calc(100% - 8px)', 'important');
+        calCard.style.setProperty('margin-bottom', '8px', 'important');
         calCard.style.setProperty('overflow', 'hidden', 'important');
         calCard.style.setProperty('background-color', colors.bgCard, 'important');
         calCard.style.setProperty('box-shadow', shadow3D, 'important');
@@ -1197,12 +1400,27 @@
         dc.style.setProperty('border-top-right-radius', '0px', 'important');
         dc.style.setProperty('border-bottom-left-radius', '24px', 'important');
         dc.style.setProperty('border-bottom-right-radius', '24px', 'important');
-        dc.style.setProperty('margin', '0px 12px 0px 4px', 'important');
-        dc.style.setProperty('height', '100%', 'important');
-        dc.style.setProperty('max-height', '100%', 'important');
-        dc.style.setProperty('overflow', 'hidden', 'important');
+        dc.style.setProperty('margin', '0px 12px 8px 4px', 'important');
+        dc.style.setProperty('height', 'calc(100% - 8px)', 'important');
+        dc.style.setProperty('max-height', 'calc(100% - 8px)', 'important');
+        dc.style.setProperty('overflow', 'visible', 'important');
         dc.style.setProperty('background-color', colors.bgCard, 'important');
         dc.style.setProperty('box-shadow', shadow3D, 'important');
+      }
+
+      var prefCards = document.querySelectorAll('[ui-view="preferences"] > md-content');
+      for (var pr = 0; pr < prefCards.length; pr++) {
+        var pc = prefCards[pr];
+        pc.style.setProperty('border-top-left-radius', '0px', 'important');
+        pc.style.setProperty('border-top-right-radius', '0px', 'important');
+        pc.style.setProperty('border-bottom-left-radius', '24px', 'important');
+        pc.style.setProperty('border-bottom-right-radius', '24px', 'important');
+        pc.style.setProperty('margin', '0px 12px 8px 4px', 'important');
+        pc.style.setProperty('height', 'calc(100% - 8px)', 'important');
+        pc.style.setProperty('max-height', 'calc(100% - 8px)', 'important');
+        pc.style.setProperty('overflow', 'hidden', 'important');
+        pc.style.setProperty('background-color', colors.bgCard, 'important');
+        pc.style.setProperty('box-shadow', shadow3D, 'important');
       }
 
       var mailBodies = document.querySelectorAll('.sg-mail-body, .sg-mail-container, .sg-mail-view md-content, md-card md-content');
@@ -1262,8 +1480,8 @@
           if (iframe.contentDocument && iframe.contentDocument.body) {
             var ifDoc = iframe.contentDocument;
             var ifBody = ifDoc.body;
-            ifBody.style.setProperty('padding-bottom', '12px', 'important');
-            ifBody.style.setProperty('box-sizing', 'border-box', 'important');
+            
+            ifBody.style.setProperty('padding-bottom', '16px', 'important');
 
             if (colors.isDark) {
               var ifStyle = ifDoc.getElementById('sogo-dark-iframe-fix-v3');
@@ -1282,7 +1500,7 @@
                   color: #ffffff !important;
                   border-color: ${colors.border} !important;
                 }
-                a, a *, span.a {
+                a:not([style*="background"]), a:not([style*="background"]) *, span.a:not([style*="background"]) {
                   color: ${colors.accentBtn} !important;
                   text-decoration: underline !important;
                 }
@@ -1313,7 +1531,7 @@
     function syncActiveItemsAndFolders() {
       var colors = getThemeColors();
 
-      var listContainers = document.querySelectorAll('#messagesList, #contactsList, [ui-view="list"], .sg-contacts-list, .sg-list');
+      var listContainers = document.querySelectorAll('[ui-view="list"] md-list, [ui-view="contacts"] md-list, #messagesList, #contactsList');
       for (var c = 0; c < listContainers.length; c++) {
         var list = listContainers[c];
         var items = list.querySelectorAll('md-list-item, .sg-tile, .sg-list-item');
@@ -1386,8 +1604,11 @@
         }
       }
 
-      var sideNav = document.querySelector('md-sidenav');
-      if (sideNav) {
+      var sideNavs = document.querySelectorAll('md-sidenav');
+      for (var sn = 0; sn < sideNavs.length; sn++) {
+        var sideNav = sideNavs[sn];
+        if (sideNav.closest('[ui-view="preferences"]')) continue; 
+
         var folderItems = sideNav.querySelectorAll('md-list-item');
         for (var f = 0; f < folderItems.length; f++) {
           var folder = folderItems[f];
@@ -1408,13 +1629,19 @@
           }
 
           if (selectedFolder) {
-            var actBg = colors.isDark ? '#ffffff' : '#d3e3fd';
-            var actTxt = '#041e49';
+            var actBg = colors.isDark ? '#ffffff' : colors.bgActiveFolder;
+            var actTxt = colors.isDark ? '#041e49' : '#041e49';
 
             folder.style.setProperty('background-color', actBg, 'important');
             folder.style.setProperty('background', actBg, 'important');
             folder.style.setProperty('border-radius', '24px', 'important');
             
+            if (innerBtn) {
+              innerBtn.style.setProperty('background-color', actBg, 'important');
+              innerBtn.style.setProperty('background', actBg, 'important');
+              innerBtn.style.setProperty('border-radius', '24px', 'important');
+            }
+
             var allFolderNodes = folder.querySelectorAll('a, button, div, span, md-icon, .md-button, .md-no-style');
             for (var fn = 0; fn < allFolderNodes.length; fn++) {
               var node = allFolderNodes[fn];
@@ -1440,6 +1667,8 @@
 
               ucNode.style.setProperty('background-color', 'transparent', 'important');
               ucNode.style.setProperty('color', colors.isDark ? '#ffffff' : '#041e49', 'important');
+              ucNode.style.setProperty('fill', colors.isDark ? '#ffffff' : '#041e49', 'important');
+              ucNode.style.setProperty('font-weight', '700', 'important');
             }
           } else {
             folder.style.removeProperty('background-color');
@@ -1479,6 +1708,12 @@
             labelNode.style.setProperty('fill', '#a0b3c6', 'important');
           }
         }
+
+        var mailIcons = document.querySelectorAll('.sg-mail-view md-icon, #mailView md-icon, md-card md-icon');
+        for (var mi = 0; mi < mailIcons.length; mi++) {
+            mailIcons[mi].style.setProperty('color', '#ffffff', 'important');
+            mailIcons[mi].style.setProperty('fill', '#ffffff', 'important');
+        }
       }
 
       var dialogs = document.querySelectorAll('md-dialog, .sg-event-editor, .sg-event-dialog');
@@ -1493,7 +1728,7 @@
           dlgContentElems[dce].style.setProperty('background', colors.bgCard, 'important');
         }
 
-        var formInputs = dlg.querySelectorAll('input, textarea, md-select, .md-select-value, label, span, p, md-radio-button, md-checkbox');
+        var formInputs = dlg.querySelectorAll('input, textarea, md-select, .md-select-value, label, p');
         for (var inp = 0; inp < formInputs.length; inp++) {
           formInputs[inp].style.setProperty('color', colors.textPrimary, 'important');
         }
