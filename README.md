@@ -13,14 +13,15 @@ This theme transforms SOGo's default AngularJS Material interface into a premier
 ## ✨ Features
 
 - **Centered Floating Theme Toggle (v2.5):** An elegant, circular floating ☀️/🌙 switcher positioned directly in the top header. Seamlessly available across Mail, Calendar, Contacts, and Settings without encroaching on sidebar space.
-- **Dynamic Pastel Active Folder Tracking (v2.5):** Active folders dynamically receive a soft pastel sky-blue (`#cbe6fc` in Light / `#34475e` in Dark) capsule with a sharp 4px focus indicator bar, following your folder navigation in real time.
-- **Subtle Unread Folder Highlighting (v2.5):** Folders with unread messages (`CONTABO | 1`, `DIGI | 1`, etc.) automatically illuminate with an ultra-delicate, calm pastel ice-blue tint (`#f0f6ff` in Light / `#2e3a48` in Dark) and bold typography without competing with the active folder.
-- **Calendar & Modal Dialog Overhaul (v2.5):** Complete visual fix for the Calendar module. Restores the clean 3-pane side-by-side flex layout, eliminates inverted dark-mode table grid lines, and ensures high-contrast, crystal-clear typography inside the Event Editor (`md-dialog`) popups.
+- **Universal Active Navigation Tracking (v2.5):** Active folders and address books dynamically receive a soft pastel sky-blue (`#cbe6fc` in Light / `#34475e` in Dark) capsule with a sharp 4px focus indicator bar, following your navigation in real time across multilingual setups.
+- **Subtle Unread Folder Highlighting (v2.5):** Folders with unread messages automatically illuminate with an ultra-delicate, calm pastel ice-blue tint (`#eef5fd` in Light / `#2b3947` in Dark) and bold typography without competing with the active folder.
+- **Calendar & Contacts Modal Dialog Overhaul (v2.5):** Complete visual fix for event and contact editor popups (`md-dialog`). Ensures fully scrollable form contents with a sticky footer so the Save button is always accessible.
+- **Calendar Grid Perfection (v2.5):** Restores the clean 3-pane side-by-side flex layout, eliminates inverted dark-mode table grid lines, and ensures readable off-hours scheduling rows.
 - **Accurate Quota Progress Bar (v2.5):** Fixed the determinate progress calculation so the account quota bar displays accurate real-world percentages without overflowing or getting stuck at 100%.
 - **Seamless Light & Dark Mode Engine:** Fully automatic duplex engine that respects session storage, cookies, or OS system preferences (`prefers-color-scheme`).
 - **Intelligent IFrame Dark Mode:** Dynamically injects a clean, non-destructive dark stylesheet into HTML message previews (iframes) and the inline composer, completely preventing blinding white flashes.
 - **Global Icon Normalization & Fluid Hover Zoom:** All toolbar, header, card, and secondary action icons automatically adapt to deep navy (`#041e49`) in Light Mode and pure white (`#ffffff`) in Dark Mode, with a smooth 1.18x hover scale animation.
-- **Floating 3D Card Architecture:** The message list, calendar view, and detail panels float seamlessly above the canvas with unified `20px` border-radii, crisp borders, and a balanced bottom baseline.
+- **Floating 3D Card Architecture:** The message list, calendar view, contacts view, and detail panels float seamlessly above the canvas with unified `20px` border-radii, crisp borders, and a balanced bottom baseline.
 - **CKEditor 5 & Compose Dark Mode:** Custom styling for inline mail composing, attachments, recipient chips, and action toolbars.
 
 ## 🚀 Installation
@@ -60,13 +61,13 @@ Alternatively, add the script to SOGo's `Custom.js` if supported by your SOGo in
 | :--- | :--- | :--- |
 | **App Canvas (Background)** | `#f4f7fc` | `#2e3b4b` |
 | **Floating Cards & Modals** | `#ffffff` | `#364454` |
-| **Active Folder Capsule** | `#cbe6fc` *(4px `#0056b3` bar)* | `#34475e` *(4px `#66b2ff` bar)* |
-| **Unread Folder Capsule** | `#f0f6ff` *(Subtle pastel)* | `#2e3a48` *(Subtle slate)* |
+| **Active Folder & Address Book** | `#cbe6fc` *(4px `#0056b3` bar)* | `#34475e` *(4px `#66b2ff` bar)* |
+| **Unread Folder Capsule** | `#eef5fd` *(Subtle pastel)* | `#2b3947` *(Subtle slate)* |
 | **Active Message Item** | `#dbeafe` *(4px `#0b57d0` bar)* | `#415266` *(4px `#66b2ff` bar)* |
 | **Starred Message Item** | `#fef9c3` *(Pastel soft yellow)* | `#423b20` *(Muted amber)* |
 | **Primary Text & Headings** | `#002244` / `#041e49` | `#ffffff` |
 | **Muted Text & Labels** | `#475569` | `#a0b3c6` |
-| **Action & Accent Buttons** | `#0b57d0` | `#66b2ff` |
+| **Action & Accent Buttons** | `#041e49` | `#66b2ff` |
 
 ## 🛠️ Tech Stack & Security
 
