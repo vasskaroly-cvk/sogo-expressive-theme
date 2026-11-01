@@ -11,8 +11,6 @@
 (function() {
   'use strict';
 
-  console.log('SOGo Expressive Theme v4.1.0 loading...');
-
   angular.module('SOGo.Common')
     .config(configure)
     .run(applyExpressiveTheme);
@@ -84,7 +82,6 @@
           bgCard: '#364454',          
           bgHeader: '#273342',        
           bgHover: '#425266',         
-          // Pasztell aktív mappa sötét módban:
           bgActiveFolder: '#34475e',  
           borderActiveFolder: '#4a6382',
           borderLeftActiveFolder: '#66b2ff',
@@ -93,10 +90,9 @@
           bgActivePanel: '#415266',    
           borderActivePanel: '#66b2ff',
           textActivePanel: '#ffffff',  
-          // Finom, halványabb olvasatlan mappa sötét módban:
-          bgUnreadFolder: '#2e3a48',  
-          borderUnreadFolder: '#38485a',
-          textUnreadFolder: '#e2e8f0',
+          bgUnreadFolder: '#2b3947',  
+          borderUnreadFolder: '#3b4e63',
+          textUnreadFolder: '#ffffff',
           iconUnreadFolder: '#93c5fd',
           bgStarSoft: '#423b20',
           borderStarSoft: '#eab308',
@@ -117,7 +113,6 @@
           bgCard: '#ffffff',
           bgHeader: '#f4f7fc',
           bgHover: '#edf2f7',
-          // Lágy pasztell aktív mappa világos módban:
           bgActiveFolder: '#cbe6fc',          
           borderActiveFolder: '#99cfff',      
           borderLeftActiveFolder: '#0056b3',  
@@ -126,11 +121,10 @@
           bgActivePanel: '#dbeafe',          
           borderActivePanel: '#0b57d0',
           textActivePanel: '#041e49',
-          // Kifejezetten finom, halvány pasztell olvasatlan mappa világos módban:
-          bgUnreadFolder: '#f0f6ff',          
+          bgUnreadFolder: '#eef5fd',          
           borderUnreadFolder: '#dbeafe',
-          textUnreadFolder: '#1e3a8a',
-          iconUnreadFolder: '#3b82f6',
+          textUnreadFolder: '#041e49',
+          iconUnreadFolder: '#041e49',
           bgStarSoft: '#fef9c3',              
           borderStarSoft: '#fde047',
           textStar: '#713f12',
@@ -138,7 +132,7 @@
           textPrimary: '#041e49',
           textMuted: '#475569',
           iconColor: '#041e49',
-          accentBtn: '#0b57d0',
+          accentBtn: '#041e49',
           accentFab: '#c2e7ff',
           fabIcon: '#001d35',
           border: '#e2e8f0'
@@ -162,84 +156,67 @@
       return item.classList.contains('sg-star-bg') || item.querySelector('.sg-star-bg') !== null;
     }
 
-    // A keresősáv fejlécéből pontosan kiderül, melyik mappa van nyitva
-    function getActiveMailboxKeyword() {
-      var headerRow = document.querySelector('[ui-view="main"] md-toolbar:not(.sg-user-info), .sg-header-tools, md-toolbar:has(input), .sg-search-bar');
-      var searchInput = document.querySelector('input.sg-filter-input, form.sg-filter input');
-      
-      var textToSearch = '';
-      if (headerRow) textToSearch += ' ' + headerRow.textContent;
-      if (searchInput) textToSearch += ' ' + (searchInput.placeholder || searchInput.value || '');
-      
-      textToSearch = textToSearch.toLowerCase();
-      
-      var mailboxes = [
-        'levélszemét',
-        'piszkozatok',
-        'elküldött',
-        'lomtár',
-        'sablonok',
-        'archive',
-        'contabo',
-        'digi',
-        'dijnet',
-        'elmu',
-        'emag',
-        'beérkezett'
-      ];
-      
-      for (var i = 0; i < mailboxes.length; i++) {
-        if (textToSearch.indexOf(mailboxes[i]) !== -1) {
-          return mailboxes[i];
-        }
-      }
-      
-      return ''; // Nincs hibás alapértelmezett visszaugrás!
-    }
-
-    // Aktív mappa dinamikus és megbízható felismerése
-    function isFolderActive(folder, activeKeyword) {
+    // Univerzális aktív mappa és címjegyzék vizsgálat
+    function isFolderActive(folder) {
       if (!folder) return false;
 
-      if (activeKeyword) {
-        var fText = (folder.textContent || '').toLowerCase();
-        if (fText.indexOf(activeKeyword) !== -1) {
-          return true;
+      // 1. SOGo natív kijelölési osztályai
+      if (folder.classList.contains('md-active') ||
+          folder.classList.contains('sg-folder-selected') ||
+          folder.classList.contains('sg-item-selected') ||
+          folder.classList.contains('sg-selected') ||
+          (folder.classList.contains('md-bg') && folder.classList.contains('md-hue-2')) ||
+          folder.getAttribute('aria-selected') === 'true' ||
+          folder.querySelector('.md-active, .sg-folder-selected, .sg-item-selected, .sg-selected, [aria-selected="true"]') !== null) {
+        return true;
+      }
+
+      // 2. Fejléc címsorának dinamikus vizsgálata
+      var titleNode = document.querySelector('.sg-folder-name, [ui-view="main"] md-toolbar .md-toolbar-tools > span, [ui-view="main"] md-toolbar h2, .sg-toolbar-tools span');
+      var currentTitle = (titleNode && titleNode.textContent ? titleNode.textContent.trim().toLowerCase() : '');
+      
+      if (!currentTitle) {
+        var searchInput = document.querySelector('input.sg-filter-input, form.sg-filter input');
+        if (searchInput && searchInput.placeholder) {
+          var m = searchInput.placeholder.match(/:\s*(.+)$/);
+          if (m) currentTitle = m[1].trim().toLowerCase();
         }
       }
 
-      var hasNativeClass = folder.classList.contains('md-active') ||
-                           folder.classList.contains('sg-folder-selected') ||
-                           folder.classList.contains('sg-item-selected') ||
-                           folder.getAttribute('aria-selected') === 'true' ||
-                           folder.querySelector('.md-active, .sg-folder-selected, .sg-item-selected, [aria-selected="true"]') !== null;
-
-      if (hasNativeClass && !activeKeyword) {
-        return true;
+      if (currentTitle && currentTitle.length > 1 && currentTitle !== 'sogo') {
+        var fText = (folder.querySelector('p, span, .sg-name, .md-body-1')?.textContent || folder.textContent || '').trim().toLowerCase();
+        fText = fText.replace(/[|:–—\(\[].*$/, '').trim();
+        if (fText === currentTitle) {
+          return true;
+        }
       }
 
       return false;
     }
 
-    // Golyóálló olvasatlan mappa felismerés
+    // Univerzális és biztos olvasatlan mappa vizsgálat
     function isFolderUnread(folder) {
       if (!folder) return false;
 
+      // 1. Natív osztályok
       if (folder.classList.contains('sg-unread') || 
-          folder.classList.contains('sg-folder-unread') ||
-          folder.querySelector('.sg-unread, .sg-folder-unread, .sg-badge, .sg-unread-count')) {
+          folder.classList.contains('sg-folder-unread')) {
         return true;
       }
 
-      var text = (folder.textContent || '').trim();
-      if (/[|:–—\(\[]\s*[1-9]\d*/.test(text)) return true;
-
-      if (/\b[1-9]\d{0,2}\b/.test(text)) {
-        var match = text.match(/\b([1-9]\d*)\b/);
-        if (match && parseInt(match[1], 10) < 1000) {
-          return true;
-        }
+      // 2. Látható jelvények
+      var badge = folder.querySelector('.sg-badge:not(.ng-hide), .sg-unread-count:not(.ng-hide)');
+      if (badge) {
+        var count = parseInt((badge.textContent || '').replace(/\D/g, ''), 10);
+        if (!isNaN(count) && count > 0) return true;
       }
+
+      // 3. Szöveges tartalom vizsgálata
+      var raw = ((folder.innerText || '') + ' ' + (folder.textContent || '')).replace(/more_vert/g, '').trim();
+      
+      if (/[|:–—\(\[]\s*[1-9]\d*/.test(raw)) return true;
+      if (/\([1-9]\d*\)/.test(raw) || /\[[1-9]\d*\]/.test(raw)) return true;
+      if (/\b([1-9]\d{0,2})\b/.test(raw)) return true;
 
       return false;
     }
@@ -273,9 +250,7 @@
         : '0 12px 28px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.08)';
 
       style.textContent = `
-        /* ====================================================================
-           1. ALAPOK, GYÖKÉR ÉS FELSŐ SÁV
-           ==================================================================== */
+        /* Root Canvas */
         html, body {
             background-color: ${colors.bgMain} !important;
             height: 100vh !important;
@@ -297,9 +272,7 @@
             box-shadow: none !important;
         }
 
-        /* -------------------------------------------------------------
-           2. KÖZÉPRE IGAZÍTOTT LEBEGŐ NAP/HOLD GOMB
-           ------------------------------------------------------------- */
+        /* Lebegő Nap/Hold gomb */
         #sogo-theme-toggle-btn {
             position: fixed !important;
             left: 50% !important;
@@ -324,9 +297,7 @@
             box-shadow: 0 6px 16px rgba(0,0,0,0.25) !important;
         }
 
-        /* -------------------------------------------------------------
-           3. BAL FELSŐ FIÓK & KVÓTASÁV
-           ------------------------------------------------------------- */
+        /* Fiók infó & Kvótasáv: Olyan sötét mint az ikonok (#041e49) */
         .sg-user-info {
             padding: 10px 14px 6px 14px !important;
             display: flex !important;
@@ -345,7 +316,8 @@
         .sg-user-info span,
         .sg-user-info .md-caption {
             color: ${colors.isDark ? '#d3dbe2' : '#041e49'} !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
+            opacity: 1 !important;
         }
 
         md-sidenav [aria-label*="@"],
@@ -359,8 +331,10 @@
         md-sidenav [aria-label*="@"] *,
         md-sidenav [ng-click*="account"] *,
         md-sidenav .sg-account-item * {
-            color: ${colors.textPrimary} !important;
-            font-weight: 600 !important;
+            color: ${colors.isDark ? '#ffffff' : '#041e49'} !important;
+            fill: ${colors.isDark ? '#ffffff' : '#041e49'} !important;
+            font-weight: 700 !important;
+            opacity: 1 !important;
         }
 
         .sg-quota, .sg-quota-info, [ng-show*="quota"] {
@@ -385,16 +359,16 @@
 
         md-progress-linear .md-bar1 { display: none !important; visibility: hidden !important; }
         md-progress-linear .md-container { background-color: ${colors.isDark ? '#273342' : '#cbd5e1'} !important; border-radius: 4px !important; height: 5px !important; }
-        md-progress-linear .md-bar2 { background-color: ${colors.accentBtn} !important; border-radius: 4px !important; height: 5px !important; }
+        md-progress-linear .md-bar2 { background-color: ${colors.isDark ? '#66b2ff' : '#041e49'} !important; border-radius: 4px !important; height: 5px !important; }
 
-        /* ====================================================================
-           4. OLDALSÁV (MAPPASTRUKTÚRA & KAPSZULÁK)
-           ==================================================================== */
+        /* Oldalsáv & Mappák alapstílusa */
         md-sidenav,
         md-sidenav.md-locked-open,
         md-sidenav md-content,
         md-sidenav md-content.md-default-theme,
-        .sg-folder-list {
+        .sg-folder-list,
+        .sg-contacts-sidebar,
+        .sg-calendar-sidebar {
             background-color: ${colors.bgMain} !important;
             background: ${colors.bgMain} !important;
             border: none !important;
@@ -420,25 +394,70 @@
             background-color: ${colors.bgHover} !important; 
         }
 
-        /* Sötét mód alapvető mappanevek */
-        html.sogo-dark md-sidenav md-list-item:not(.sg-active-folder-pill):not(.sg-unread-folder-pill) *,
-        html.sogo-dark md-sidenav md-list-item:not(.sg-active-folder-pill):not(.sg-unread-folder-pill) p,
-        html.sogo-dark md-sidenav md-list-item:not(.sg-active-folder-pill):not(.sg-unread-folder-pill) span {
+        /* Fejlécek a bal oldalsávban */
+        md-sidenav md-subheader,
+        md-sidenav .md-subheader,
+        md-sidenav .md-subheader-inner,
+        .sg-contacts-sidebar md-subheader,
+        .sg-calendar-sidebar md-subheader {
+            background-color: transparent !important;
+            background: transparent !important;
+            color: ${colors.textMuted} !important;
+            font-weight: 700 !important;
+            border: none !important;
+        }
+
+        /* MAPPALISTA IKONOK: SÖTÉTKÉKEK ÉS NEM FAKÓK! */
+        html.sogo-light md-sidenav md-list-item md-icon,
+        html.sogo-light md-sidenav md-list-item svg,
+        html.sogo-light .sg-folder-list md-icon,
+        html.sogo-light .sg-contacts-sidebar md-icon {
+            color: #041e49 !important;
+            fill: #041e49 !important;
+            opacity: 1 !important;
+        }
+
+        html.sogo-dark md-sidenav md-list-item *,
+        html.sogo-dark md-sidenav md-list-item p,
+        html.sogo-dark md-sidenav md-list-item span,
+        html.sogo-dark .sg-calendar-sidebar p,
+        html.sogo-dark .sg-calendar-sidebar span {
             color: #d3dbe2 !important;
             font-weight: 500 !important;
-            opacity: 1 !important;
         }
 
-        html.sogo-dark md-sidenav md-list-item:not(.sg-active-folder-pill):not(.sg-unread-folder-pill) md-icon,
-        html.sogo-dark md-sidenav md-list-item:not(.sg-active-folder-pill):not(.sg-unread-folder-pill) svg {
+        html.sogo-dark md-sidenav md-list-item md-icon,
+        html.sogo-dark md-sidenav md-list-item svg {
             color: #ffffff !important;
             fill: #ffffff !important;
-            opacity: 1 !important;
         }
 
-        /* ====================================================================
-           5. FŐ SZIGETEK (LISTA ÉS OLVASÓTÉR)
-           ==================================================================== */
+        /* CÍMJEGYZÉK KIVÁLASZTOTT ELEM BELSŐ RÉTEG ÁTTETSZŐSÉG */
+        md-sidenav md-list-item .md-list-item-inner,
+        md-sidenav md-list-item .md-list-item-text {
+            background: transparent !important;
+            background-color: transparent !important;
+        }
+
+        html.sogo-light md-sidenav md-list-item.md-active *,
+        html.sogo-light md-sidenav md-list-item.sg-folder-selected *,
+        html.sogo-light md-sidenav md-list-item.sg-item-selected * {
+            color: #002244 !important;
+            -webkit-text-fill-color: #002244 !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        html.sogo-dark md-sidenav md-list-item.md-active *,
+        html.sogo-dark md-sidenav md-list-item.sg-folder-selected *,
+        html.sogo-dark md-sidenav md-list-item.sg-item-selected * {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        /* Fő kártyák és panelek */
         [ui-view="list"], [ui-view="detail"], [ui-view="contacts"], [ui-view="preferences"] {
             background-color: transparent !important;
             box-sizing: border-box !important;
@@ -460,7 +479,7 @@
             color: ${colors.textMain} !important;
         }
 
-        md-card, [id="mailView"], [id="messageView"], .sg-mail-view {
+        md-card, [id="mailView"], [id="messageView"], .sg-mail-view, [id="contactView"], .sg-contact-view {
             background-color: ${colors.bgCard} !important;
             border-top-left-radius: 0 !important;
             border-top-right-radius: 0 !important;
@@ -484,7 +503,7 @@
             color: ${colors.textMain} !important;
         }
 
-        .sg-mail-view md-toolbar, [id="mailView"] md-toolbar, [id="messageView"] md-toolbar, md-card md-toolbar {
+        .sg-mail-view md-toolbar, [id="mailView"] md-toolbar, [id="messageView"] md-toolbar, md-card md-toolbar, .sg-contact-view md-toolbar {
             background-color: ${colors.bgCard} !important;
             border-bottom: 1px solid ${colors.border} !important;
             border-radius: 0 !important;
@@ -499,9 +518,15 @@
         .sg-mail-headers .sg-mail-header-labels, .sg-mail-headers .sg-mail-header-label, .sg-mail-headers .md-caption, .sg-mail-headers label { color: ${colors.textMuted} !important; }
         .sg-mail-headers a, .sg-mail-header-values a, .sg-mail-attachments a { color: ${colors.accentBtn} !important; text-decoration: underline !important; }
 
-        /* ====================================================================
-           6. NAPTÁR (CALENDARS) TELJES SÖTÉT MÓD ÉS NÉZET FIX
-           ==================================================================== */
+        /* Címjegyzék linkek sötétben */
+        html.sogo-dark [id="contactView"] a,
+        html.sogo-dark .sg-contact-view a,
+        html.sogo-dark [ui-view="detail"] a {
+            color: #66b2ff !important;
+            text-decoration: underline !important;
+        }
+
+        /* Naptár modul elrendezés */
         .sg-calendar-container,
         [ui-view="calendars"],
         [ui-view="calendar"] {
@@ -526,6 +551,11 @@
             border-radius: 20px !important;
             overflow: hidden !important;
             border: none !important;
+        }
+
+        .sg-calendar-sidebar md-list-item {
+            overflow: hidden !important;
+            border-radius: 8px !important;
         }
 
         #calendarView,
@@ -557,26 +587,34 @@
             background-color: ${colors.bgCard} !important;
         }
 
+        /* Naptárrács sötétben */
         html.sogo-dark [ui-view="calendars"] td,
+        html.sogo-dark [ui-view="calendars"] th,
         html.sogo-dark [ui-view="calendars"] tr,
         html.sogo-dark [ui-view="calendars"] table,
         html.sogo-dark [ui-view="calendar"] td,
+        html.sogo-dark [ui-view="calendar"] th,
         html.sogo-dark [ui-view="calendar"] tr,
         html.sogo-dark [ui-view="calendar"] table,
         html.sogo-dark #calendarView td,
+        html.sogo-dark #calendarView th,
         html.sogo-dark #calendarView tr,
         html.sogo-dark #calendarView table,
         html.sogo-dark .calendarView td,
         html.sogo-dark .calendarView tr,
+        html.sogo-dark .calendarView table,
         html.sogo-dark .calendarView,
         html.sogo-dark .allDaysView,
         html.sogo-dark .hours,
         html.sogo-dark .hour,
         html.sogo-dark .day,
-        html.sogo-dark .days {
-            background-color: ${colors.bgCard} !important;
-            background: ${colors.bgCard} !important;
-            border-color: ${colors.border} !important;
+        html.sogo-dark .days,
+        html.sogo-dark .sg-calendar-grid,
+        html.sogo-dark td[class*="off"],
+        html.sogo-dark td[class*="nonWorking"] {
+            background-color: #364454 !important;
+            background: #364454 !important;
+            border-color: #273342 !important;
             color: #ffffff !important;
         }
 
@@ -586,19 +624,48 @@
             color: #a0b3c6 !important;
         }
 
-        /* ====================================================================
-           7. NAPTÁR BEJEGYZÉS SZERKESZTŐ (MD-DIALOG POPUP)
-           ==================================================================== */
-        md-dialog,
-        .md-dialog-container,
-        md-dialog-content,
-        .sg-event-editor,
-        form[name="eventForm"] {
-            background-color: ${colors.bgCard} !important;
-            color: ${colors.textMain} !important;
+        /* Naptárrács világosban */
+        html.sogo-light [ui-view="calendars"] td,
+        html.sogo-light [ui-view="calendar"] td,
+        html.sogo-light #calendarView td,
+        html.sogo-light .calendarView td {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.sogo-light td[class*="off"],
+        html.sogo-light td[class*="nonWorking"] {
+            background-color: #f8fafc !important;
+        }
+
+        /* NAPTÁR ÉS CÍMJEGYZÉK SZERKESZTŐ POPUP */
+        md-dialog {
+            max-height: 90vh !important;
+            height: auto !important;
+            display: flex !important;
+            flex-direction: column !important;
             border-radius: 16px !important;
             overflow: hidden !important;
             box-shadow: 0 16px 40px rgba(0,0,0,0.4) !important;
+            background-color: ${colors.bgCard} !important;
+            color: ${colors.textMain} !important;
+        }
+
+        md-dialog-content,
+        md-dialog .md-dialog-content,
+        md-dialog md-content,
+        md-dialog form,
+        .sg-event-editor,
+        .sg-contact-editor,
+        .sg-card-editor,
+        form[name="eventForm"],
+        form[name="cardForm"],
+        form[name="contactForm"] {
+            overflow: auto !important;
+            overflow-y: auto !important;
+            flex: 1 1 auto !important;
+            max-height: calc(90vh - 110px) !important;
+            -webkit-overflow-scrolling: touch !important;
+            background-color: ${colors.bgCard} !important;
         }
 
         md-dialog input,
@@ -626,11 +693,19 @@
             color: ${colors.isDark ? '#ffffff' : '#041e49'} !important;
         }
 
+        /* Rögzített gombsor a felugró ablak alján */
         md-dialog md-dialog-actions,
-        md-dialog .md-actions {
+        md-dialog .md-actions,
+        md-dialog-actions {
+            flex-shrink: 0 !important;
+            position: sticky !important;
+            bottom: 0 !important;
+            z-index: 10 !important;
             background-color: ${colors.bgCard} !important;
             border-top: 1px solid ${colors.border} !important;
-            padding: 12px 16px !important;
+            padding: 10px 16px !important;
+            display: flex !important;
+            justify-content: flex-end !important;
         }
 
         md-dialog md-dialog-actions button,
@@ -647,9 +722,7 @@
             padding: 4px 16px !important;
         }
 
-        /* ====================================================================
-           8. LEVÉLLISTA KÉK CSÍK TÖRLÉSE & IKONOK
-           ==================================================================== */
+        /* Levéllista formázás */
         [ui-view="list"] md-progress-linear, #messagesList md-progress-linear { display: none !important; }
         [ui-view="list"] md-divider, #messagesList md-divider, [ui-view="list"] md-list-item:after, #messagesList md-list-item:after { display: none !important; }
         [id="messagesList"] md-subheader, [id="messagesList"] .md-subheader { background-color: transparent !important; color: ${colors.textMuted} !important; }
@@ -730,7 +803,7 @@
         parentContainers[p].style.setProperty('overflow', 'visible', 'important');
       }
 
-      var sideNavs = document.querySelectorAll('md-sidenav, md-sidenav.md-locked-open, md-sidenav md-content, .sg-folder-list');
+      var sideNavs = document.querySelectorAll('md-sidenav, md-sidenav.md-locked-open, md-sidenav md-content, .sg-folder-list, .sg-contacts-sidebar, .sg-calendar-sidebar');
       for (var s = 0; s < sideNavs.length; s++) {
         var sn = sideNavs[s];
         sn.style.setProperty('background-color', colors.bgMain, 'important');
@@ -810,10 +883,9 @@
     function syncActiveItemsAndFolders() {
       var colors = getThemeColors();
       var targetIconColor = colors.isDark ? '#ffffff' : '#041e49';
-      var activeKeyword = getActiveMailboxKeyword();
 
-      // 1. Levéllista tételek szinkronizálása
-      var items = document.querySelectorAll('[ui-view="list"] md-list-item, #messagesList md-list-item');
+      // 1. Levéllista és Címjegyzék lista tételek szinkronizálása
+      var items = document.querySelectorAll('[ui-view="list"] md-list-item, #messagesList md-list-item, [ui-view="contacts"] md-list-item, #contactsList md-list-item');
       for (var i = 0; i < items.length; i++) {
         var item = items[i];
         var selected = isMessageSelected(item);
@@ -854,7 +926,7 @@
         }
       }
 
-      // 2. Mappalista dinamikus szinkronizálása
+      // 2. Mappalista és Címjegyzék oldalsáv szinkronizálása
       var sideNavListItems = document.querySelectorAll('md-sidenav md-list-item');
       for (var f = 0; f < sideNavListItems.length; f++) {
         var folder = sideNavListItems[f];
@@ -863,85 +935,117 @@
           continue;
         }
 
-        var isSel = isFolderActive(folder, activeKeyword);
+        var isSel = isFolderActive(folder);
         var isUnread = !isSel && isFolderUnread(folder);
 
-        var allWrappers = folder.querySelectorAll('.md-button, .md-no-style, .md-list-item-inner');
-
         if (isSel) {
-          // AKTÍV MAPPA FESTÉSE (Dinamikusan követi az épp nyitott mappát!)
-          folder.style.setProperty('background-color', colors.bgActiveFolder, 'important');
-          folder.style.setProperty('background', colors.bgActiveFolder, 'important');
-          folder.style.setProperty('border', '1px solid ' + colors.borderActiveFolder, 'important');
-          folder.style.setProperty('border-left', '4px solid ' + colors.borderLeftActiveFolder, 'important');
+          var actBg = colors.bgActiveFolder;
+          var actBorder = colors.borderActiveFolder;
+          var actLeftBar = colors.borderLeftActiveFolder;
+          var actTxt = colors.textActiveFolder;
+          var actIcon = colors.iconActiveFolder;
+
+          folder.style.setProperty('background-color', actBg, 'important');
+          folder.style.setProperty('background', actBg, 'important');
+          folder.style.setProperty('border', '1px solid ' + actBorder, 'important');
+          folder.style.setProperty('border-left', '4px solid ' + actLeftBar, 'important');
           folder.style.setProperty('border-radius', '8px', 'important');
 
-          for (var w = 0; w < allWrappers.length; w++) {
-            allWrappers[w].style.setProperty('background-color', colors.bgActiveFolder, 'important');
-            allWrappers[w].style.setProperty('background', colors.bgActiveFolder, 'important');
-            allWrappers[w].style.setProperty('border-radius', '8px', 'important');
+          // A belső gombokat és szövegtartókat átlátszóvá tesszük, hogy ne fedjék le a szöveget és az ikont!
+          var innerElements = folder.querySelectorAll('.md-button, .md-no-style, .md-list-item-inner, .md-list-item-text');
+          for (var ie = 0; ie < innerElements.length; ie++) {
+            innerElements[ie].style.setProperty('background', 'transparent', 'important');
+            innerElements[ie].style.setProperty('background-color', 'transparent', 'important');
           }
 
+          // A szövegek és ikonok garantáltan élesen látszanak
           var fKids = folder.querySelectorAll('*');
           for (var fk = 0; fk < fKids.length; fk++) {
             var node = fKids[fk];
             if (node.tagName === 'MD-ICON' || node.tagName === 'SVG' || node.tagName === 'PATH') {
-              node.style.setProperty('color', colors.iconActiveFolder, 'important');
-              node.style.setProperty('fill', colors.iconActiveFolder, 'important');
-            } else {
-              node.style.setProperty('color', colors.textActiveFolder, 'important');
+              node.style.setProperty('color', actIcon, 'important');
+              node.style.setProperty('fill', actIcon, 'important');
+              node.style.setProperty('opacity', '1', 'important');
+              node.style.setProperty('visibility', 'visible', 'important');
+            } else if (!node.classList.contains('md-button') && !node.classList.contains('md-no-style') && !node.classList.contains('md-list-item-inner')) {
+              node.style.setProperty('color', actTxt, 'important');
+              node.style.setProperty('-webkit-text-fill-color', actTxt, 'important');
               node.style.setProperty('font-weight', '700', 'important');
+              node.style.setProperty('opacity', '1', 'important');
+              node.style.setProperty('visibility', 'visible', 'important');
             }
           }
         } else if (isUnread) {
-          // OLVASATLAN MAPPA FESTÉSE (Kifejezetten halványabb, diszkrét pasztell)
-          folder.style.setProperty('background-color', colors.bgUnreadFolder, 'important');
-          folder.style.setProperty('background', colors.bgUnreadFolder, 'important');
-          folder.style.setProperty('border', '1px solid ' + colors.borderUnreadFolder, 'important');
+          var unreadBg = colors.bgUnreadFolder;
+          var unreadBorder = colors.borderUnreadFolder;
+          var unreadTxt = colors.textUnreadFolder;
+          var unreadIcon = colors.iconUnreadFolder;
+
+          folder.style.setProperty('background-color', unreadBg, 'important');
+          folder.style.setProperty('background', unreadBg, 'important');
+          folder.style.setProperty('border', '1px solid ' + unreadBorder, 'important');
           folder.style.removeProperty('border-left');
           folder.style.setProperty('border-radius', '8px', 'important');
 
-          for (var uw = 0; uw < allWrappers.length; uw++) {
-            allWrappers[uw].style.setProperty('background-color', colors.bgUnreadFolder, 'important');
-            allWrappers[uw].style.setProperty('background', colors.bgUnreadFolder, 'important');
-            allWrappers[uw].style.setProperty('border-radius', '8px', 'important');
+          var innerElementsUnread = folder.querySelectorAll('.md-button, .md-no-style, .md-list-item-inner, .md-list-item-text');
+          for (var ieu = 0; ieu < innerElementsUnread.length; ieu++) {
+            innerElementsUnread[ieu].style.setProperty('background', 'transparent', 'important');
+            innerElementsUnread[ieu].style.setProperty('background-color', 'transparent', 'important');
           }
 
           var uKids = folder.querySelectorAll('*');
           for (var uk = 0; uk < uKids.length; uk++) {
             var uNode = uKids[uk];
             if (uNode.tagName === 'MD-ICON' || uNode.tagName === 'SVG' || uNode.tagName === 'PATH') {
-              uNode.style.setProperty('color', colors.iconUnreadFolder, 'important');
-              uNode.style.setProperty('fill', colors.iconUnreadFolder, 'important');
-            } else {
-              uNode.style.setProperty('color', colors.textUnreadFolder, 'important');
+              uNode.style.setProperty('color', uNode.closest('md-sidenav') && colors.isDark ? '#ffffff' : '#041e49', 'important');
+              uNode.style.setProperty('fill', uNode.closest('md-sidenav') && colors.isDark ? '#ffffff' : '#041e49', 'important');
+              uNode.style.setProperty('opacity', '1', 'important');
+              uNode.style.setProperty('visibility', 'visible', 'important');
+            } else if (!uNode.classList.contains('md-button') && !uNode.classList.contains('md-no-style') && !uNode.classList.contains('md-list-item-inner')) {
+              uNode.style.setProperty('color', unreadTxt, 'important');
+              uNode.style.setProperty('-webkit-text-fill-color', unreadTxt, 'important');
               uNode.style.setProperty('font-weight', '700', 'important');
+              uNode.style.setProperty('opacity', '1', 'important');
+              uNode.style.setProperty('visibility', 'visible', 'important');
             }
           }
         } else {
-          // NORMÁL MAPPA RESET
+          // NORMÁL MAPPA VISSZAÁLLÍTÁSA
           folder.style.removeProperty('background-color');
           folder.style.removeProperty('background');
           folder.style.removeProperty('border');
           folder.style.removeProperty('border-left');
 
-          for (var nvw = 0; nvw < allWrappers.length; nvw++) {
-            allWrappers[nvw].style.removeProperty('background-color');
-            allWrappers[nvw].style.removeProperty('background');
+          var innerElementsNormal = folder.querySelectorAll('.md-button, .md-no-style, .md-list-item-inner, .md-list-item-text');
+          for (var ien = 0; ien < innerElementsNormal.length; ien++) {
+            innerElementsNormal[ien].style.removeProperty('background-color');
+            innerElementsNormal[ien].style.removeProperty('background');
           }
 
           var normalKids = folder.querySelectorAll('*');
           for (var nk = 0; nk < normalKids.length; nk++) {
             var nChild = normalKids[nk];
-            nChild.style.removeProperty('background-color');
-            if (colors.isDark) {
-              nChild.style.setProperty('color', '#d3dbe2', 'important');
-              nChild.style.setProperty('fill', '#ffffff', 'important');
-              nChild.style.removeProperty('font-weight');
-            } else {
-              nChild.style.setProperty('color', '#475569', 'important');
-              nChild.style.setProperty('fill', '#475569', 'important');
-              nChild.style.removeProperty('font-weight');
+            if (nChild.tagName === 'MD-ICON' || nChild.tagName === 'SVG' || nChild.tagName === 'PATH') {
+              if (colors.isDark) {
+                nChild.style.setProperty('color', '#ffffff', 'important');
+                nChild.style.setProperty('fill', '#ffffff', 'important');
+              } else {
+                nChild.style.setProperty('color', '#041e49', 'important');
+                nChild.style.setProperty('fill', '#041e49', 'important');
+              }
+              nChild.style.setProperty('opacity', '1', 'important');
+              nChild.style.setProperty('visibility', 'visible', 'important');
+            } else if (!nChild.classList.contains('md-button') && !nChild.classList.contains('md-no-style') && !nChild.classList.contains('md-list-item-inner')) {
+              nChild.style.removeProperty('background-color');
+              if (colors.isDark) {
+                nChild.style.setProperty('color', '#d3dbe2', 'important');
+                nChild.style.setProperty('-webkit-text-fill-color', '#d3dbe2', 'important');
+                nChild.style.removeProperty('font-weight');
+              } else {
+                nChild.style.setProperty('color', '#041e49', 'important');
+                nChild.style.setProperty('-webkit-text-fill-color', '#041e49', 'important');
+                nChild.style.removeProperty('font-weight');
+              }
             }
           }
         }
