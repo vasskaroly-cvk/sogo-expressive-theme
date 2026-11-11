@@ -33,59 +33,21 @@ A modern, responsive, and performance-optimized theme for **SOGo Webmail** featu
 
 ---
 
-## 🚀 Installation & Deployment
+## 🚀 Installation & Deployment (Mailcow Docker)
 
-### Method 1: Mailcow (Docker)
+If you are running SOGo via **Mailcow**, copy the theme script directly to Mailcow's custom SOGo configuration directory as `custom-theme.js`:
 
-If you are running SOGo via **Mailcow**, inject the script using Mailcow's custom SOGo configuration:
-
-1. Copy `sogo-expressive-theme.js` to your Mailcow server:
+1. Copy and rename the theme script on your Mailcow server:
    ```bash
-   cp sogo-expressive-theme.js /opt/mailcow-dockerized/data/web/js/sogo-expressive-theme.js
+   cp sogo-expressive-theme.js /opt/mailcow-dockerized/data/conf/sogo/custom-theme.js
    ```
-2. Edit `/opt/mailcow-dockerized/data/conf/sogo/sogo.conf` (or custom HTML header template) to include the script:
-   ```html
-   <script src="/js/sogo-expressive-theme.js"></script>
-   ```
-3. Restart SOGo container:
+
+2. Restart the Mailcow containers to apply the theme:
    ```bash
-   docker compose restart sogo-mailcow
+   docker compose restart sogo-mailcow memcached-mailcow nginx-mailcow
    ```
 
----
-
-### Method 2: Reverse Proxy / Web Server Injection (Nginx / Apache)
-
-Inject the script into SOGo's `index.html` via Nginx `sub_filter`:
-
-```nginx
-location /SOGo {
-    proxy_pass http://sogo_backend;
-    sub_filter '</body>' '<script src="/custom/sogo-expressive-theme.js"></script></body>';
-    sub_filter_once on;
-}
-```
-
----
-
-### Method 3: Browser Extension / UserScript (Tampermonkey / Violentmonkey)
-
-For client-side testing or personal use:
-
-1. Install **Tampermonkey** or **Violentmonkey**.
-2. Create a new UserScript.
-3. Paste the contents of `sogo-expressive-theme.js` wrapped in a UserScript header:
-   ```javascript
-   // ==UserScript==
-   // @name         SOGo Expressive Theme v3.0
-   // @namespace    https://github.com/vasskaroly-cvk/sogo-expressive-theme
-   // @version      3.0
-   // @description  Material 3 & Thunderbird theme for SOGo Webmail
-   // @author       Károly Vass (cvk.hu)
-   // @match        https://*/SOGo*
-   // @grant        none
-   // ==UserScript==
-   ```
+*(Mailcow automatically mounts `data/conf/sogo/custom-theme.js` into SOGo without requiring additional configuration).*
 
 ---
 
@@ -122,4 +84,3 @@ Users can switch themes anytime using the floating **Sun/Moon** button at the to
 ## 📄 License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
